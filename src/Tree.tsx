@@ -11,6 +11,7 @@ import { installBangFoliage } from './BangFoliage';
 import { createParentDayDecor } from './ParentDayDecor';
 import { adjustedPixelRatio,renderPixelRatio } from './RenderQuality';
 import EnvelopeWish from './EnvelopeWish';
+import { createMorningSky } from './MorningSky';
 
 export type ViewSettings = {zoom:number;autoRotate:boolean;speed:number;reset:number};
 type Props = { wishes: Wish[]; ready: boolean; arrival: Arrival | null; view:ViewSettings };
@@ -34,7 +35,7 @@ export default function Tree(props: Props) {
     renderer.shadowMap.autoUpdate=false; renderer.shadowMap.needsUpdate=true;
     renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.toneMappingExposure = 1;
     el.appendChild(renderer.domElement); renderer.domElement.setAttribute('aria-label','Cây tri ân 3D với tán lá nhỏ, dày. Mỗi lời chúc được treo lên cây bằng một bao thư thả dây xuống.');
-    const scene = new THREE.Scene(); scene.background = new THREE.Color('#c8d9e0'); scene.fog = new THREE.FogExp2('#d8c7ac',.011);
+    const scene = new THREE.Scene(); scene.background = new THREE.Color('#d5e6eb'); scene.fog = new THREE.FogExp2('#dce5d7',.0075);
     const camera = new THREE.PerspectiveCamera(38,1,.1,400); camera.position.set(21,11,34); camera.lookAt(0,7,0);
     const controls = new OrbitControls(camera,renderer.domElement); controls.target.set(0,7,0); controls.enableDamping = true; controls.enablePan = false;
     controls.minDistance = 15; controls.maxDistance = 55; controls.minPolarAngle = .55; controls.maxPolarAngle = Math.PI * .49;
@@ -43,21 +44,15 @@ export default function Tree(props: Props) {
       camera.zoom = state.current.view.zoom; camera.updateProjectionMatrix();
       if (lastReset !== state.current.view.reset) { lastReset = state.current.view.reset; camera.position.set(21,11,34); controls.target.set(0,7,0); controls.update(); }
     }; applyView.current();
-    const sunDirection=new THREE.Vector3(-.9,.24,-1).normalize();
-    const sky = new Sky(); sky.scale.setScalar(350); sky.material.uniforms.turbidity.value = 2.8; sky.material.uniforms.rayleigh.value = 1.6;
+    const sunDirection=new THREE.Vector3(-.95,.18,-1).normalize();
+    const sky = new Sky(); sky.scale.setScalar(350); sky.material.uniforms.turbidity.value = 3.8; sky.material.uniforms.rayleigh.value = 1.8;
     sky.material.uniforms.mieCoefficient.value = .004; sky.material.uniforms.mieDirectionalG.value = .86;
     sky.material.uniforms.sunPosition.value.copy(sunDirection); scene.add(sky);
-    scene.add(new THREE.HemisphereLight('#e2ecff','#957350',1.65));
-    const sun = new THREE.DirectionalLight('#ffe1ad',3.2); sun.target.position.set(0,5,0); sun.position.copy(sunDirection).multiplyScalar(55).add(sun.target.position); sun.castShadow = true;
+    scene.add(new THREE.HemisphereLight('#e4f0ff','#829266',1.8));
+    const sun = new THREE.DirectionalLight('#ffe7bf',2.9); sun.target.position.set(0,5,0); sun.position.copy(sunDirection).multiplyScalar(55).add(sun.target.position); sun.castShadow = true;
     sun.shadow.mapSize.set(1024,1024); sun.shadow.camera.left = -25; sun.shadow.camera.right = 25; sun.shadow.camera.top = 24; sun.shadow.camera.bottom = -20; sun.shadow.camera.far = 100; sun.shadow.normalBias = .045; sun.shadow.bias = -.0002; scene.add(sun,sun.target);
-    const glowCanvas=document.createElement('canvas'); glowCanvas.width=glowCanvas.height=256;
-    const glowContext=glowCanvas.getContext('2d')!,sunWash=glowContext.createRadialGradient(128,128,0,128,128,128);
-    sunWash.addColorStop(0,'rgba(255,250,222,1)'); sunWash.addColorStop(.12,'rgba(255,235,175,.8)'); sunWash.addColorStop(.4,'rgba(255,214,140,.16)'); sunWash.addColorStop(1,'rgba(255,206,125,0)');
-    glowContext.fillStyle=sunWash; glowContext.fillRect(0,0,256,256);
-    const sunTexture=new THREE.CanvasTexture(glowCanvas); sunTexture.colorSpace=THREE.SRGBColorSpace;
-    const sunGlow=new THREE.Sprite(new THREE.SpriteMaterial({map:sunTexture,transparent:true,depthWrite:false,blending:THREE.AdditiveBlending,fog:false}));
-    sunGlow.position.copy(sunDirection).multiplyScalar(220); sunGlow.scale.set(39,39,1); scene.add(sunGlow);
     const motion = matchMedia('(prefers-reduced-motion: reduce)');
+    const morning=createMorningSky(scene,sunDirection,motion.matches);
     const meadow = createMeadow(scene,motion.matches);
     const flowers = createYellowFlowers(scene,motion.matches);
     const {oak,roots,crownLift} = createAncientOak(); scene.add(oak,roots); oak.updateMatrixWorld(true);
@@ -114,7 +109,7 @@ export default function Tree(props: Props) {
     function render() {
       frame = requestAnimationFrame(render); const elapsed=clock.getDelta(); if (document.hidden) return; const dt=Math.min(elapsed,.12); now += dt;
       controls.autoRotate = state.current.view.autoRotate && !motion.matches && !reading.current; controls.autoRotateSpeed = state.current.view.speed * .8; controls.update(dt);
-      meadow.update(now); flowers.update(now); decor.update(now); oak.update(motion.matches ? 0 : now);
+      morning.update(now,camera); meadow.update(now); flowers.update(now); decor.update(now); oak.update(motion.matches ? 0 : now);
       renderer.render(scene,camera);
       if (elapsed > 0 && elapsed < .5) { sampleTime+=elapsed; sampleFrames++; }
       if (sampleTime >= 2) {
@@ -133,7 +128,7 @@ export default function Tree(props: Props) {
       canvas.removeEventListener('pointermove',pointerMove); canvas.removeEventListener('pointercancel',cancelPress);
       const geometries = new Set<THREE.BufferGeometry>(),materials = new Set<THREE.Material>(),textures=new Set<THREE.Texture>();
       scene.traverse(o => { if (o instanceof THREE.Mesh || o instanceof THREE.Points) { geometries.add(o.geometry); (Array.isArray(o.material) ? o.material : [o.material]).forEach(m => materials.add(m)); if (o instanceof THREE.InstancedMesh) o.dispose(); } });
-      materials.add(sunGlow.material);
+      scene.traverse(object => { if (object instanceof THREE.Sprite) materials.add(object.material); });
       geometries.forEach(g => g.dispose()); materials.forEach(m => { Object.values(m).forEach(value => { if (value instanceof THREE.Texture) textures.add(value); }); m.dispose(); }); textures.forEach(t => t.dispose()); renderer.dispose(); renderer.domElement.remove();
     };
   },[]);
