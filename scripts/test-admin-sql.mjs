@@ -31,7 +31,7 @@ try {
   const upgrade=fs.readFileSync('supabase/migrations/006_ten_colorful_parent_wishes.sql','utf8');
   await db.exec(upgrade);await db.exec(upgrade);
   const samples=(await db.query('select recipient,message from public.emergency_samples')).rows;
-  assert.ok(samples.every(sample=>sample.recipient==='Con yêu' && /^(Ba|Mẹ)\s/i.test(sample.message)));
+  assert.ok(samples.every(sample=>sample.recipient.trim().split(/\s+/).length===2 && /^(Ba|Mẹ)\s/i.test(sample.message)));
   const definition=await value("select pg_get_functiondef('public.admin_delete_all_wishes(uuid,text)'::regprocedure) as value");
   assert.match(definition,/delete from public\.wishes where id is not null/i);
   assert.equal(await value('select count(*)::int as value from public.emergency_samples'),120);

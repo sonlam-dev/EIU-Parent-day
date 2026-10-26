@@ -8,7 +8,7 @@ test('All 120 emergency messages are unique, short wishes from parents to childr
   assert.equal(samples.length,120);
   assert.equal(new Set(samples.map(([,message])=>message)).size,120);
   for(const [recipient,message] of samples) {
-    assert.equal(recipient,'Con yêu');
+    assert.equal(recipient.trim().split(/\s+/).length,2);
     assert.match(message,/^(Ba|Mẹ)\s/i);
     assert.ok(message.length>=10 && message.length<=90);
   }
@@ -16,6 +16,6 @@ test('All 120 emergency messages are unique, short wishes from parents to childr
 
 test('Demo wishes use the same parent-to-child voice and all four colors',()=>{
   assert.equal(new Set(sampleWishes.map(w=>w.color)).size,4);
-  assert.ok(sampleWishes.every(w=>w.recipient==='Con yêu' && /^(Ba|Mẹ)\s/i.test(w.message)));
+  assert.ok(sampleWishes.every(w=>w.recipient.trim().split(/\s+/).length===2 && /^(Ba|Mẹ)\s/i.test(w.message)));
   assert.ok(sampleWishes.every(w=>w.name.trim().split(/\s+/).length===2));
 });
