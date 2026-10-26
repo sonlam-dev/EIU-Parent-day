@@ -1,4 +1,4 @@
-﻿import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
 import { createClearSky } from './ClearSky';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
@@ -9,7 +9,7 @@ import { createAncientOak } from './ancientTree';
 import { createYellowFlowers } from './Flowers';
 import { installBangFoliage } from './BangFoliage';
 import { createParentDayDecor } from './ParentDayDecor';
-import { adjustedPixelRatio,renderPixelRatio } from './RenderQuality';
+import { RenderQuality,renderPixelRatio } from './RenderQuality';
 import EnvelopeWish from './EnvelopeWish';
 import { createMorningSky } from './MorningSky';
 import { daylightBalance } from './Daylight';
@@ -41,19 +41,24 @@ export default function Tree(props: Props) {
     renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.toneMappingExposure = .96;
     el.appendChild(renderer.domElement); renderer.domElement.setAttribute('aria-label','Cây tri ân 3D với tán lá nhỏ, dày. Mỗi lời chúc được treo lên cây bằng một bao thư thả dây xuống.');
     const scene = new THREE.Scene();
-    scene.fog=new THREE.Fog('#d9edf7',65,190);
+    scene.fog=new THREE.Fog('#b4dcf6',65,190);
     const camera = new THREE.PerspectiveCamera(38,1,.1,3000); camera.position.set(21,11,34); camera.lookAt(0,7,0);
     const controls = new OrbitControls(camera,renderer.domElement); controls.target.set(0,7,0); controls.enableDamping = true; controls.enablePan = false;
     controls.minDistance = 15; controls.maxDistance = 55; controls.minPolarAngle = .55; controls.maxPolarAngle = Math.PI * .49;
     let lastReset = state.current.view.reset;
+    camera.zoom=state.current.view.zoom;
     applyView.current = () => {
-      camera.zoom = state.current.view.zoom; camera.updateProjectionMatrix();
-      if (lastReset !== state.current.view.reset) { lastReset = state.current.view.reset; camera.position.set(21,11,34); controls.target.set(0,7,0); controls.update(); }
+      if (lastReset !== state.current.view.reset) {
+        lastReset = state.current.view.reset;
+        const mobile=el.clientWidth<700;
+        camera.position.set(mobile ? 34 : 21,mobile ? 15 : 11,mobile ? 55 : 34);
+        controls.target.set(0,mobile ? 7.8 : 7,0); controls.update();
+      }
     }; applyView.current();
     const sunDirection=new THREE.Vector3(-.95,.28,-1).normalize();
     createClearSky(scene,sunDirection);
     const logoTexture=new THREE.TextureLoader().load(eiuLogo); logoTexture.colorSpace=THREE.SRGBColorSpace;
-    const trademark=new THREE.Sprite(new THREE.SpriteMaterial({map:logoTexture,transparent:true,opacity:.28,depthWrite:false,fog:false,toneMapped:false}));
+    const trademark=new THREE.Sprite(new THREE.SpriteMaterial({map:logoTexture,transparent:true,opacity:.38,depthWrite:false,fog:false,toneMapped:false}));
     trademark.name='EIU sky trademark'; scene.add(trademark);
     const logoRay=new THREE.Vector3();
     scene.add(new THREE.HemisphereLight('#e4f0ff','#a6b58c',1.85));
@@ -108,14 +113,13 @@ export default function Tree(props: Props) {
       lastToken=event.token; decor.highlight(event.id);
     }; launch.current();
     let resolution=1,resolutionCeiling=1;
+    const quality=new RenderQuality();
+    let pendingSize:{width:number;height:number}|undefined;
+    let mobile:boolean|undefined;
     const resize = new ResizeObserver(() => {
       const {width,height} = el.getBoundingClientRect(); if (!width || !height) return;
-      camera.aspect = width / height;
-      if (width < 700) { camera.position.set(34,15,55); controls.target.set(0,7.8,0); camera.setViewOffset(width,height,0,-height * .08,width,height); }
-      else { camera.position.set(21,11,34); controls.target.set(0,7,0); camera.setViewOffset(width,height,width * .11,0,width,height); }
-      controls.update();
-      resolutionCeiling=renderPixelRatio(width,height,devicePixelRatio); resolution=resolutionCeiling;
-      renderer.setPixelRatio(resolution); camera.updateProjectionMatrix(); renderer.setSize(width,height);
+      // ResizeObserver only queues work: changing canvas dimensions clears its pixels.
+      pendingSize={width,height};
     }); resize.observe(el);
     let disposed=false,prepared=false,warmupFrames=0;
     let compileTimer:ReturnType<typeof setTimeout>|undefined;
@@ -130,15 +134,37 @@ export default function Tree(props: Props) {
     });
     const clock = new THREE.Clock(); let frame = 0,sampleTime=0,sampleFrames=0;
     function render() {
-      frame = requestAnimationFrame(render); const elapsed=clock.getDelta(); if (document.hidden || !prepared) return; const dt=Math.min(elapsed,.12); now += dt;
+      frame = requestAnimationFrame(render); const elapsed=clock.getDelta();
+      if (document.hidden || !prepared) { sampleTime=0; sampleFrames=0; return; }
+      // Resize and redraw in the same frame, never leave a cleared canvas on screen.
+      if (pendingSize) {
+        const {width,height}=pendingSize; pendingSize=undefined;
+        const nextMobile=width<700;
+        if (mobile!==nextMobile) {
+          camera.position.set(nextMobile ? 34 : 21,nextMobile ? 15 : 11,nextMobile ? 55 : 34);
+          controls.target.set(0,nextMobile ? 7.8 : 7,0); controls.update();
+        }
+        const initial=mobile===undefined; mobile=nextMobile;
+        camera.aspect=width/height;
+        camera.setViewOffset(width,height,nextMobile ? 0 : width*.11,nextMobile ? -height*.08 : 0,width,height);
+        resolutionCeiling=renderPixelRatio(width,height,devicePixelRatio);
+        resolution=initial ? resolutionCeiling : Math.min(resolution,resolutionCeiling);
+        quality.reset(); sampleTime=0; sampleFrames=0;
+        renderer.setPixelRatio(resolution); renderer.setSize(width,height);
+      } else if (Math.abs(renderer.getPixelRatio()-resolution)>.01) renderer.setPixelRatio(resolution);
+      const dt=Math.min(elapsed,.05); now += dt;
+      const zoom=THREE.MathUtils.damp(camera.zoom,state.current.view.zoom,9,dt);
+      if (Math.abs(camera.zoom-state.current.view.zoom)>.0001) { camera.zoom=zoom; camera.updateProjectionMatrix(); }
       controls.autoRotate = state.current.view.autoRotate && !motion.matches && !reading.current; controls.autoRotateSpeed = state.current.view.speed * .8; controls.update(dt);
       morning.update(now,camera); meadow.update(now); flowers.update(now); decor.update(now); oak.update(motion.matches ? 0 : now);
-      // Place the mark beyond the tree so foliage naturally occludes it, above the sky layer.
+      // Place the mark in the lower-left sky quadrant relative to the tree canopy.
       camera.updateMatrixWorld();
-      logoRay.set(-.68,.79,.5).unproject(camera).sub(camera.position).normalize();
+      logoRay.set(camera.aspect<1 ? -.48 : -.64,camera.aspect<1 ? .18 : .06,.5).unproject(camera).sub(camera.position).normalize();
       trademark.position.copy(camera.position).addScaledVector(logoRay,160);
-      const logoWidth=2*160*Math.tan(THREE.MathUtils.degToRad(camera.fov*.5))/camera.zoom*camera.aspect*(camera.aspect<1 ? .3 : .21);
-      const logoAspect=logoTexture.image ? logoTexture.image.width/logoTexture.image.height : 3.25;
+      const logoAspect=logoTexture.image ? logoTexture.image.width/logoTexture.image.height : 3.5;
+      // Fill the lower-left sky while keeping a subtle watermark scale.
+      const logoWidthFraction=camera.aspect<1 ? .42 : .23;
+      const logoWidth=2*160*Math.tan(THREE.MathUtils.degToRad(camera.fov*.5))/camera.zoom*camera.aspect*logoWidthFraction;
       trademark.scale.set(logoWidth,logoWidth/logoAspect,1);
       sun.position.copy(sunDirection).multiplyScalar(55).add(sun.target.position);
       fill.position.copy(camera.position); fill.position.y=Math.max(camera.position.y,12);
@@ -153,8 +179,7 @@ export default function Tree(props: Props) {
       if (sampleTime >= 2) {
         const fps=sampleFrames / sampleTime;
         if (now > 5) {
-          const next=adjustedPixelRatio(resolution,resolutionCeiling,fps);
-          if (Math.abs(next-resolution) > .01) { resolution=next; renderer.setPixelRatio(resolution); }
+          resolution=quality.sample(resolution,resolutionCeiling,fps,sampleTime);
         }
         Object.assign(renderer.domElement.dataset,{activeDrops:String(decor.activeDrops),activeGlows:String(decor.activeGlows),fps:fps.toFixed(1),pixelRatio:resolution.toFixed(2),drawCalls:String(renderer.info.render.calls),triangles:String(renderer.info.render.triangles)});
         sampleTime=0; sampleFrames=0;
@@ -172,6 +197,6 @@ export default function Tree(props: Props) {
     };
   },[]);
   const selectedWish=props.wishes.find(wish => wish.id===selectedId && wish.status==='approved');
-  return <><div className="event-world" data-scene-ready={sceneReady}><div ref={host} className="scene-canvas"/>{failed ? <div className="screen-loading"><span>🌳</span><p>Không khởi tạo được WebGL. Hãy mở màn hình chiếu bằng trình duyệt hỗ trợ tăng tốc đồ họa.</p></div> : <div className="scene-loading-veil" aria-hidden={sceneReady}><div className="scene-loading-caption" role="status"><span className="scene-loading-mark"><Sprout size={32}/></span><p>Đang mở khu vườn yêu thương…</p></div></div>}</div>{selectedId && <EnvelopeWish key={selectedId} wish={selectedWish} onClose={() => setSelectedId(null)}/>}</>;
+  return <><div className="event-world" data-scene-ready={sceneReady}><div ref={host} className="scene-canvas"/>{failed ? <div className="screen-loading"><span>🌳</span><p>Không khởi tạo được WebGL. Hãy mở màn hình chiếu bằng trình duyệt hỗ trợ tăng tốc đồ họa.</p></div> : <div className="scene-loading-veil" aria-hidden={sceneReady}><div className="scene-loading-caption" role="status"><span className="scene-loading-mark"><Sprout size={32}/></span><p>Loading.......</p></div></div>}</div>{selectedId && <EnvelopeWish key={selectedId} wish={selectedWish} onClose={() => setSelectedId(null)}/>}</>;
 }
 

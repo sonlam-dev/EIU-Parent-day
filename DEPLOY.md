@@ -7,7 +7,7 @@
 - Mỗi lời chúc được duyệt có đúng một lá thư trên cây. Không có lá thư trang trí giả.
 - Lúc mở trang: khôi phục toàn bộ thư đã duyệt; khung hiện 5 lời mới nhất theo thứ tự cũ → mới từ trên xuống. Nếu chưa đủ 5, chỉ hiện số có thật.
 - Khi nhận lời mới: hiện thẻ và thêm thư cùng một lượt. Nếu khung đủ 5, thẻ cũ nhất cuộn lên, thẻ mới vào dưới cùng. Thư cũ vẫn trên cây.
-- Nhiều lời đến cùng lúc được xếp hàng theo thời gian, mỗi lượt cách nhau 3,6 giây; không bỏ lời chúc. Cuộn kéo dài 0,6 giây. Bấm thẻ hoặc lá thư để đọc đầy đủ.
+- Nhiều lời đến cùng lúc được xếp hàng theo thời gian, mỗi lượt cách nhau ngẫu nhiên 1–3 giây; không bỏ lời chúc. Cuộn kéo dài 0,6 giây. Bấm thẻ hoặc lá thư để đọc đầy đủ.
 - Sửa/ẩn lời chúc cập nhật nội dung hoặc gỡ khỏi khung và cây. Realtime có tải lại dự phòng mỗi 15 giây và khi quay lại tab.
 - Demo không đồng bộ qua Internet. Muốn nhiều điện thoại cùng dùng trên Vercel phải cấu hình Supabase.
 - QR màu xanh nằm trong khung lời chúc, không có nút QR riêng phía trên. Khi chưa có lời được duyệt, khung hiện QR lớn và hướng dẫn quét. Lời đầu tiên được duyệt kích hoạt chuyển cảnh sang danh sách; QR tiếp tục hiện ở chân khung. Cây và đồng cỏ chờ texture/shader sẵn sàng rồi hiện dần khi mở trang.
@@ -42,9 +42,9 @@ Sau migration 001, chạy **toàn bộ** `supabase/migrations/003_admin_operatio
 
 Nếu đã cài bản 003 cũ và nút xóa báo lỗi, chạy `supabase/migrations/004_fix_admin_delete.sql`. File này chỉ cập nhật hàm xóa để có điều kiện `WHERE id IS NOT NULL`, tương thích với cơ chế safeupdate của Supabase; không tự xóa dữ liệu khi chạy migration. Sau đó thử lại từ `/admin`. Bản frontend mới hiển thị mã lỗi cụ thể thay cho thông báo chung; cần deploy lại frontend để nhận cách báo lỗi mới.
 
-- **Emergency**: mỗi lần bấm thêm ngẫu nhiên 30–40 lời vào `wishes`, trạng thái `approved`, nguồn `emergency`. Màn hình nhận qua Realtime, mỗi lời tương ứng một lá thư. Có thể bấm lại sau khi lượt trước hoàn tất. Bộ mẫu dùng lần lượt, không lặp trước khi hết 120 lời rồi quay vòng; mỗi bản ghi luôn có UUID mới.
+- **Emergency**: mỗi lần bấm thêm đúng 10 lời với đủ 4 màu bao thư vào `wishes`, trạng thái `approved`, nguồn `emergency`. Màn hình nhận qua Realtime, mỗi lời tương ứng một lá thư. Có thể bấm lại sau khi lượt trước hoàn tất. Bộ mẫu dùng lần lượt, không lặp trước khi hết 120 lời rồi quay vòng; mỗi bản ghi luôn có UUID mới.
 - Lời mẫu đứng tên **EIU Parent Day**, được gắn nhãn **Lời mẫu Emergency** trong quản trị. Đây là nội dung dự phòng do ban tổ chức tạo, không gán tên khách tham dự. Bộ nội dung gốc nằm trong `supabase/emergency-messages.json`.
-- Bộ 120 mẫu hiện là lời **ba mẹ gửi cho con**, người nhận **Con yêu**, xoay quanh học tập, sự cố gắng, sức khỏe, ước mơ, gia đình và sự tử tế. Nếu đã cài bộ mẫu cũ, chạy `supabase/migrations/005_parent_to_child_samples.sql` để cập nhật. Migration chỉ thay thư viện mẫu cho các lượt Emergency tiếp theo; không sửa lời đã đăng hoặc đặt lại vị trí quay vòng.
+- Bộ 120 mẫu là lời ngắn **ba mẹ gửi cho con**, người nhận **Con yêu**, xoay quanh học tập, sự cố gắng, sức khỏe, ước mơ, gia đình và sự tử tế. Nếu đã cài bản cũ, chạy `supabase/migrations/006_ten_colorful_parent_wishes.sql` để cập nhật 120 mẫu và giới hạn 10 lời mỗi lượt. Migration chỉ áp dụng cho các lượt Emergency tiếp theo; không sửa lời đã đăng hoặc đặt lại vị trí quay vòng.
 - **Xóa tất cả**: xóa vĩnh viễn toàn bộ lời chúc ở mọi trạng thái, gồm cả lời mẫu, và gỡ thư khỏi cây. Không xóa tài khoản Auth hoặc quyền admin. Nhập `XOA TAT CA` và bấm xác nhận. Không thể hoàn tác trong ứng dụng.
 - Mỗi thao tác có mã yêu cầu riêng để thử lại sau lỗi mạng mà không thêm hai đợt hoặc xóa nhầm đợt mới. Quyền được kiểm tra trong hàm SQL; tài khoản đăng nhập không có trong `admins` không thể thực hiện.
 - Nếu sửa bộ 120 mẫu: chạy `node scripts/build-admin-migration.mjs`, rồi chạy lại file SQL 003 đã tạo trên Supabase. Không giảm hoặc tăng số mẫu ngoài 120.

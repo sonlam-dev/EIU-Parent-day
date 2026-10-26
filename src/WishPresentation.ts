@@ -1,7 +1,9 @@
 import type { Wish } from './types.ts';
 import { WishQueue } from './WishQueue.ts';
 
-export const WISH_INTERVAL_MS=3600;
+export function nextWishInterval(random:()=>number=Math.random) {
+  return 1000+Math.floor(Math.max(0,Math.min(1,random()))*2000);
+}
 export class WishPresentation {
   private queue=new WishQueue();
   private shown=new Map<string,Wish>();

@@ -31,7 +31,7 @@ Cây dùng **@dgreenheck/ez-tree 1.1.0** từ https://github.com/dgreenheck/ez-t
 
 Đồng cỏ là renderer riêng bằng Three.js: 171.500 ngọn cỏ chia thành 81 vùng, hai mức chi tiết, gió trên GPU, màu thay đổi từ gốc tới ngọn, bề mặt địa hình liên tục rộng 360 đơn vị, 1.800 cây hoa cúc vàng 3D có cánh, nhụy, thân và lá; đường chân trời có sương. Không có vùng cỏ giới hạn thành vòng tròn quanh cây.
 
-Mỗi lời chúc được duyệt có đúng một bao thư; không có thư trang trí không gắn với dữ liệu. Lúc mở trang, khôi phục toàn bộ thư và 5 thẻ mới nhất. Lời mới được xếp hàng theo thời gian, mỗi lượt 3,6 giây: hiện một thẻ và thêm một thư tương ứng. Khi đủ 5 thẻ, thẻ đầu cuộn lên trong 0,6 giây, thẻ mới vào dưới cùng. Bấm thẻ hoặc thư trên cây để đọc đầy đủ.
+Mỗi lời chúc được duyệt có đúng một bao thư, mang màu đã chọn trong form. Lúc mở trang, khôi phục toàn bộ thư và 5 thẻ mới nhất. Lời mới được xếp hàng theo thời gian, mỗi lượt cách nhau ngẫu nhiên 1–3 giây: hiện một thẻ và thêm một thư tương ứng. Khi đủ 5 thẻ, thẻ đầu cuộn lên trong 0,6 giây, thẻ mới vào dưới cùng. Bấm thẻ hoặc thư trên cây để đọc đầy đủ.
 
 Bao thư và dây dùng hai InstancedMesh chung geometry/texture, tự tăng dung lượng khi cần, không giới hạn 1.200 lời chúc. Bao thư thu nhỏ dần khi cây đông; các điểm treo được gom theo vùng để đặt nhiều lời chúc không cần quét toàn bộ tán lá. Chỉ cập nhật ma trận của bao thư đang chuyển động; gió nhẹ chạy trên GPU. Yêu cầu tải dữ liệu trùng thời điểm được gộp và chạy lần lượt để tránh trả kết quả ngược thứ tự. Dữ liệu tải lại không tạo bản trùng và không khởi động lại hiệu ứng; lời chúc bị ẩn được gỡ khỏi cây. Không phát lại lịch sử khi mở trang.
 

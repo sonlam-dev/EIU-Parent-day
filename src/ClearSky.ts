@@ -5,7 +5,7 @@ export function createClearSky(scene:THREE.Scene,sunDirection:THREE.Vector3) {
   const material=new THREE.ShaderMaterial({
     side:THREE.BackSide,depthWrite:false,toneMapped:false,
     uniforms:{
-      horizon:{value:new THREE.Color('#d9edf7')},zenith:{value:new THREE.Color('#65b8ee')},
+      horizon:{value:new THREE.Color('#b4dcf6')},zenith:{value:new THREE.Color('#329be6')},
       cloudColor:{value:new THREE.Color('#fffdf7')},sunDirection:{value:sunDirection},
     },
     vertexShader:`
@@ -32,7 +32,7 @@ export function createClearSky(scene:THREE.Scene,sunDirection:THREE.Vector3) {
       void main() {
         vec3 direction=normalize(vSkyDirection);
         float height=max(direction.y,0.0);
-        vec3 color=mix(horizon,zenith,smoothstep(0.0,0.75,height));
+        vec3 color=mix(horizon,zenith,smoothstep(0.0,0.65,height));
         vec2 cloudUv=direction.xz/(height+0.24)*2.4;
         float density=fbm(cloudUv+vec2(8.3,2.1));
         float clouds=smoothstep(0.52,0.72,density)*smoothstep(0.025,0.16,height);

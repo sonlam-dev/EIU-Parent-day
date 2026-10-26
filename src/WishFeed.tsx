@@ -33,7 +33,7 @@ export default function WishFeed({wishes,loading,connection,error,total,shareUrl
     const timer=setTimeout(()=>setTrack({rows:wishes,scrolling:false}),650);
     return ()=>clearTimeout(timer);
   },[signature]);
-  const labels={connecting:'Đang kết nối',live:'Đang nhận lời chúc',retrying:'Đang kết nối lại',demo:'Bản trải nghiệm'};
+  const labels={connecting:'Đang kết nối',live:'Đang nhận lời chúc',retrying:'Đang kết nối lại',demo:''};
   return <>
     <section className="wish-feed" data-has-wishes={hasWishes} aria-label="Lời chúc và mã QR tham gia">
       <header className="wish-feed-header"><span className="wish-feed-icon"><Mail size={20}/></span><div><span>EIU PARENT DAY</span><h1>Những lời yêu thương</h1></div><span className="wish-feed-total">{total.toLocaleString('vi')}<small>lá thư</small></span></header>
@@ -58,9 +58,9 @@ export default function WishFeed({wishes,loading,connection,error,total,shareUrl
       </div>
       <div className="wish-qr-footer" aria-hidden={!hasWishes}>
         {qr && <img src={qr} width="1000" height="1000" alt="Quét mã QR để gửi thêm lời chúc"/>}
-        <div><strong>Mời phụ huynh gửi lời chúc!</strong><p>Mở camera điện thoại và quét mã để gửi lời chúc đến con.</p></div>
+        <div><strong>Mời phụ huynh gửi lời chúc!</strong></div>
       </div>
-      <footer className="wish-feed-status" data-connection={error ? 'retrying' : connection} role="status">{error || connection==='retrying' ? <WifiOff size={13}/> : <Wifi size={13}/>}<span>{error ? 'Đang kết nối lại · giữ các lời chúc đã nhận' : labels[connection]}</span></footer>
+      {(error || connection!=='demo') && <footer className="wish-feed-status" data-connection={error ? 'retrying' : connection} role="status">{error || connection==='retrying' ? <WifiOff size={13}/> : <Wifi size={13}/>}<span>{error ? 'Đang kết nối lại · giữ các lời chúc đã nhận' : labels[connection]}</span></footer>}
     </section>
     {selected && <EnvelopeWish key={selected.id} wish={selected} onClose={()=>setSelected(null)}/>}
   </>;

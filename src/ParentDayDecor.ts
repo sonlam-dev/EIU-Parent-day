@@ -8,18 +8,21 @@ function envelopeTexture() {
   const canvas=document.createElement('canvas'); canvas.width=512; canvas.height=352;
   const ctx=canvas.getContext('2d')!;
   const paper=ctx.createLinearGradient(0,0,512,352);
-  paper.addColorStop(0,'#fffdf1'); paper.addColorStop(.6,'#f7e8c9'); paper.addColorStop(1,'#e4cca2');
+  // Neutral paper preserves the chosen instance color instead of tinting it brown.
+  paper.addColorStop(0,'#ffffff'); paper.addColorStop(.6,'#f5f5f5'); paper.addColorStop(1,'#dedede');
   ctx.fillStyle=paper; ctx.fillRect(0,0,512,352);
-  ctx.strokeStyle='#c5a97c'; ctx.lineWidth=3; ctx.strokeRect(8,8,496,336);
-  ctx.fillStyle='#f4e3bf'; ctx.beginPath(); ctx.moveTo(8,344); ctx.lineTo(256,147); ctx.lineTo(504,344); ctx.fill();
-  ctx.strokeStyle='#cfb58b'; ctx.beginPath(); ctx.moveTo(8,344); ctx.lineTo(256,147); ctx.lineTo(504,344); ctx.stroke();
-  ctx.shadowColor='#846e4b55'; ctx.shadowBlur=9; ctx.shadowOffsetY=5;
-  ctx.fillStyle='#fff4db'; ctx.beginPath(); ctx.moveTo(8,8); ctx.lineTo(256,203); ctx.lineTo(504,8); ctx.closePath(); ctx.fill();
+  ctx.lineJoin='round'; ctx.lineCap='round';
+  ctx.fillStyle='#ebebeb'; ctx.beginPath(); ctx.moveTo(8,344); ctx.lineTo(256,147); ctx.lineTo(504,344); ctx.fill();
+  ctx.strokeStyle='#535353'; ctx.lineWidth=7; ctx.beginPath(); ctx.moveTo(8,344); ctx.lineTo(256,147); ctx.lineTo(504,344); ctx.stroke();
+  ctx.shadowColor='#22222266'; ctx.shadowBlur=6; ctx.shadowOffsetY=5;
+  ctx.fillStyle='#fafafa'; ctx.beginPath(); ctx.moveTo(8,8); ctx.lineTo(256,203); ctx.lineTo(504,8); ctx.closePath(); ctx.fill();
   ctx.shadowBlur=0; ctx.shadowOffsetY=0; ctx.stroke();
-  ctx.fillStyle='#b77d58'; ctx.beginPath(); ctx.arc(256,197,30,0,Math.PI * 2); ctx.fill();
-  ctx.strokeStyle='#dbb18b'; ctx.lineWidth=2; ctx.beginPath(); ctx.arc(256,197,25,0,Math.PI * 2); ctx.stroke();
+  // Draw the border last so the folded paper cannot cover its edges.
+  ctx.strokeStyle='#454545'; ctx.lineWidth=8; ctx.strokeRect(8,8,496,336);
+  ctx.fillStyle='#8a4d36'; ctx.strokeStyle='#49332b'; ctx.lineWidth=5; ctx.beginPath(); ctx.arc(256,197,35,0,Math.PI * 2); ctx.fill(); ctx.stroke();
+  ctx.strokeStyle='#f3d4b4'; ctx.lineWidth=3; ctx.beginPath(); ctx.arc(256,197,28,0,Math.PI * 2); ctx.stroke();
   ctx.fillStyle='#fff0d3'; ctx.beginPath(); ctx.moveTo(256,210); ctx.bezierCurveTo(225,191,246,175,256,188); ctx.bezierCurveTo(266,175,287,191,256,210); ctx.fill();
-  ctx.fillStyle='#a38d69'; ctx.font='14px Georgia'; ctx.textAlign='center'; ctx.fillText('WITH LOVE · PARENT DAY',256,305);
+  ctx.fillStyle='#535353'; ctx.font='bold 16px Georgia'; ctx.textAlign='center'; ctx.fillText('WITH LOVE · PARENT DAY',256,305);
   const texture=new THREE.CanvasTexture(canvas); texture.colorSpace=THREE.SRGBColorSpace; return texture;
 }
 
@@ -90,6 +93,7 @@ export function createParentDayDecor(scene:THREE.Scene,anchors:THREE.Vector3[],r
   const orientation=new THREE.Quaternion(0,0,0,0);
   const rotation=new THREE.Quaternion(),euler=new THREE.Euler();
   let simulationTime=0,contacts=0;
+  const bodies:EnvelopeBody[]=[];
   const supportCells=new Map<string,THREE.Vector3>();
   for (const point of anchors) {
     if (point.y <= 5.5+crownLift || point.y >= 10.8+crownLift) continue;
@@ -143,11 +147,11 @@ export function createParentDayDecor(scene:THREE.Scene,anchors:THREE.Vector3[],r
     pendants=pendants.filter(p => byId.has(p.id));
     for (const wish of approved) {
       const existing=byId.get(wish.id);
-      if (existing) existing.color.set('#fff5dd').lerp(new THREE.Color(colors.find(c => c.id === wish.color)?.hex || '#68843b'),.12);
+      if (existing) existing.color.set(colors.find(c => c.id === wish.color)?.hex || colors[0].hex);
     }
     const added=approved.filter(w => !byId.has(w.id)).sort((a,b) => a.created_at.localeCompare(b.created_at) || a.id.localeCompare(b.id));
     added.forEach((w,i) => {
-      tint.set('#fff5dd').lerp(new THREE.Color(colors.find(c => c.id === w.color)?.hex || '#68843b'),.12);
+      tint.set(colors.find(c => c.id === w.color)?.hex || colors[0].hex);
       add(w.id,!initialized ? -100 : dropStart(time,i,added.length,reducedMotion),`#${tint.getHexString()}`);
     });
     reserve(pendants.length); cards.count=threads.count=halos.count=pendants.length;
@@ -159,7 +163,7 @@ export function createParentDayDecor(scene:THREE.Scene,anchors:THREE.Vector3[],r
     const steps=Math.max(1,Math.ceil(Math.min(elapsed,.1)*120)),dt=Math.min(elapsed,.1)/steps;
     contacts=0;
     for (let step=0;step<steps;step++) {
-      const at=time-(steps-step-1)*dt,bodies:EnvelopeBody[]=[];
+      const at=time-(steps-step-1)*dt; bodies.length=0;
       for (const p of pendants) {
         if (at<p.born) continue;
         const progress=THREE.MathUtils.clamp((at-p.born)/DROP_SECONDS,0,1),lift=3*(1-progress)**3,b=p.body;
@@ -186,14 +190,16 @@ export function createParentDayDecor(scene:THREE.Scene,anchors:THREE.Vector3[],r
       euler.set(reducedMotion ? 0 : Math.sin(time*.8+p.phase)*.055,Math.sin(p.phase)*.35,reducedMotion ? Math.sin(p.phase)*.08 : Math.sin(time*.9+p.phase)*.07+b.roll-b.vx*.08);
       rotation.setFromEuler(euler); dummy.quaternion.copy(orientation).multiply(rotation);
       dummy.scale.setScalar(progress<=0 ? .00001 : scale*(.9+.1*Math.sin(p.phase))); dummy.updateMatrix(); cards.setMatrixAt(i,dummy.matrix);
-      cards.setColorAt(i,tint.copy(p.color).lerp(highlightColor,p.id === focused ? .18 : 0));
+      if (dirty.has(i)) cards.setColorAt(i,tint.copy(p.color).lerp(highlightColor,p.id === focused ? .18 : 0));
       end.set(0,.28,0).multiply(dummy.scale).applyQuaternion(dummy.quaternion).add(dummy.position); direction.subVectors(end,p.anchor);
-      dummy.position.copy(p.anchor).add(end).multiplyScalar(.5); dummy.quaternion.setFromUnitVectors(worldUp,direction.clone().normalize());
-      dummy.scale.set(progress<=0 ? .00001 : 1,Math.max(.00001,direction.length()),progress<=0 ? .00001 : 1); dummy.updateMatrix(); threads.setMatrixAt(i,dummy.matrix);
+      const cordLength=direction.length();
+      dummy.position.copy(p.anchor).add(end).multiplyScalar(.5); dummy.quaternion.setFromUnitVectors(worldUp,direction.normalize());
+      dummy.scale.set(progress<=0 ? .00001 : 1,Math.max(.00001,cordLength),progress<=0 ? .00001 : 1); dummy.updateMatrix(); threads.setMatrixAt(i,dummy.matrix);
       cordSlack.setX(i,reducedMotion ? .025 : .045+(1-progress)*.18+Math.min(.16,Math.hypot(b.vx,b.vz)*.09));
-      if (progress >= 1) dirty.delete(i);
     }
-    cards.instanceMatrix.needsUpdate=true; threads.instanceMatrix.needsUpdate=true; if (cards.instanceColor) cards.instanceColor.needsUpdate=true;
+    cards.instanceMatrix.needsUpdate=true; threads.instanceMatrix.needsUpdate=true;
+    if (dirty.size && cards.instanceColor) cards.instanceColor.needsUpdate=true;
+    dirty.clear();
     cordSlack.needsUpdate=true;
   }
   function pick(raycaster:THREE.Raycaster) {

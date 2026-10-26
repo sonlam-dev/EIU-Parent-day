@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import * as THREE from 'three';
 import { envelopeSlot,dropStart } from '../src/EnvelopeLayout.ts';
 import { createParentDayDecor } from '../src/ParentDayDecor.ts';
+import {colors} from '../src/types.ts';
 
 // Canvas drawing is browser-owned; these tests inspect real Three.js instance buffers.
 globalThis.document={createElement:() => ({width:512,height:352,getContext:() => new Proxy({createLinearGradient:() => ({addColorStop(){}}),createRadialGradient:() => ({addColorStop(){}})},{get:(target,key) => target[key] || (() => {}),set:(target,key,value) => {target[key]=value;return true;}})})};
@@ -80,5 +81,37 @@ test('Curved cords have subdivisions and extra slack during a drop',() => {
   for(let time=1.12;time<5;time+=.02) decor.update(time);
   assert.ok(dropping>cords.getAttribute('aCordSlack').getX(0));
   assert.ok(meshes()[0].instanceMatrix.array.every(Number.isFinite));
+  decor.dispose();
+});
+
+test('Wind updates transforms without uploading unchanged envelope colors',()=>{
+  const {decor,meshes}=setup();decor.sync([wish(1),wish(2)],0);decor.update(0);
+  const cards=meshes()[0],version=cards.instanceColor.version;
+  const colors=Array.from(cards.instanceColor.array);
+  decor.update(1/60);decor.update(2/60);
+  assert.equal(cards.instanceColor.version,version);
+  assert.deepEqual(Array.from(cards.instanceColor.array),colors);
+  decor.highlight('wish-1');decor.update(3/60);
+  assert.equal(cards.instanceColor.version,version+1);
+  assert.notDeepEqual(Array.from(cards.instanceColor.array),colors);
+  decor.highlight('wish-2');decor.update(4/60);
+  assert.deepEqual(Array.from(cards.instanceColor.array).slice(0,3),colors.slice(0,3));
+  decor.dispose();
+});
+
+test('Envelope instance colors match form selections and follow color edits',()=>{
+  const {decor,meshes}=setup();
+  const wishes=colors.map((color,i)=>({...wish(i),color:color.id}));
+  decor.sync(wishes,0);decor.update(0);
+  const actual=new THREE.Color();
+  colors.forEach((color,i)=>{
+    meshes()[0].getColorAt(i,actual);
+    assert.equal(actual.getHexString(),new THREE.Color(color.hex).getHexString());
+  });
+  decor.sync(wishes.map(w=>({...w,color:'pink'})),1);decor.update(1);
+  colors.forEach((_,i)=>{
+    meshes()[0].getColorAt(i,actual);
+    assert.equal(actual.getHexString(),new THREE.Color(colors.find(c=>c.id==='pink').hex).getHexString());
+  });
   decor.dispose();
 });

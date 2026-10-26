@@ -55,12 +55,12 @@ begin
   end if;
   if (select count(*) from public.emergency_samples)<>120 then raise exception 'SAMPLES_NOT_READY'; end if;
   select next_index into start_index from public.emergency_cursor where singleton=true for update;
-  batch_count:=30+floor(random()*11)::integer;
+  batch_count:=10;
   select greatest(clock_timestamp(),coalesce(max(created_at)+interval '1 millisecond',clock_timestamp()))
     into batch_time from public.wishes;
   insert into public.wishes(id,name,recipient,message,color,status,source,created_at)
   select gen_random_uuid(),'EIU Parent Day',s.recipient,s.message,
-    (array['green','gold','pink','sage'])[(i%4)+1],'approved','emergency',batch_time+i*interval '1 millisecond'
+    (array['green','gold','pink','sage'])[((start_index+i)%4)::integer+1],'approved','emergency',batch_time+i*interval '1 millisecond'
   from generate_series(0,batch_count-1) as i
   join public.emergency_samples s on s.id=((start_index+i)%120)::integer+1;
   update public.emergency_cursor set next_index=(start_index+batch_count)%120 where singleton=true;
@@ -114,6 +114,21 @@ on conflict(id) do update set recipient=excluded.recipient,message=excluded.mess
 commit;
 `);
 const deleteFunction=sql.match(/create or replace function public\.admin_delete_all_wishes[\s\S]*?\$\$;/)?.[0];
+const emergencyFunction=sql.match(/create or replace function public\.admin_emergency_wishes[\s\S]*?\$\$;/)?.[0];
+if(!emergencyFunction) throw Error('Emergency function missing');
+fs.writeFileSync(new URL('../supabase/migrations/006_ten_colorful_parent_wishes.sql',import.meta.url),`-- Updates templates and future batches to exactly 10 letters in four colors.
+-- Preserves existing wishes, sample cursor, permissions, and request retry history.
+-- Requires migration 003 first. Safe to run more than once.
+begin;
+insert into public.emergency_samples(id,recipient,message) values
+${seed}
+on conflict(id) do update set recipient=excluded.recipient,message=excluded.message;
+${emergencyFunction}
+revoke all on function public.admin_emergency_wishes(uuid) from public,anon,authenticated;
+grant execute on function public.admin_emergency_wishes(uuid) to authenticated;
+notify pgrst, 'reload schema';
+commit;
+`);
 if(!deleteFunction) throw Error('Delete function missing');
 fs.writeFileSync(new URL('../supabase/migrations/004_fix_admin_delete.sql',import.meta.url),`-- Updates the function only; does not delete any data when this migration runs.
 -- Explicit predicate supports projects with safeupdate enabled.

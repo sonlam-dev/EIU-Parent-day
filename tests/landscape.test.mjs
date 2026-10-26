@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import * as THREE from 'three';
 import { createFlowerLayout } from '../src/FlowerLayout.ts';
 import { createMorningSky } from '../src/MorningSky.ts';
+import { createYellowFlowers } from '../src/Flowers.ts';
 
 globalThis.document={createElement:()=>({width:256,height:256,getContext:()=>new Proxy({
   createLinearGradient:()=>({addColorStop(){}}),createRadialGradient:()=>({addColorStop(){}}),
@@ -46,4 +47,27 @@ test('Reduced motion freezes the flock without removing sunlight',()=>{
   morning.update(0,camera); const birds=scene.getObjectByName('Distant circling birds'),before=birds.instanceMatrix.array.slice();
   morning.update(20,camera); assert.deepEqual(birds.instanceMatrix.array,before);
   assert.ok(scene.getObjectByName('Morning sun and halo').visible);
+});
+
+test('Petal detail stays in one existing bed without adding geometry or per-frame buffer uploads',()=>{
+  const scene=new THREE.Scene(),flowers=createYellowFlowers(scene,false);
+  const petals=scene.getObjectByName('Yellow cosmos petals');
+  const {positions,patches}=createFlowerLayout();
+  const patch=patches.reduce((best,p)=>(p.x-6)**2+(p.z-7)**2<(best.x-6)**2+(best.z-7)**2 ? p : best);
+  const detail=petals.geometry.getAttribute('aFlowerDetail');
+  assert.equal(scene.children.length,4);
+  assert.deepEqual(scene.children.map(mesh=>mesh.count),[20160,2520,2520,5040]);
+  assert.equal(scene.children.reduce((sum,mesh)=>sum+mesh.geometry.index.count/3*mesh.count,0),372960);
+  let detailedCount=0;
+  positions.forEach((point,i)=>{
+    const expected=(point.x-patch.x)**2+(point.z-patch.z)**2<=4 ? 1 : 0;
+    detailedCount+=expected;
+    for(let petal=0;petal<8;petal++) assert.equal(detail.getX(i*8+petal),expected);
+  });
+  assert.ok(detailedCount>0 && detailedCount<positions.length/10);
+  const versions=scene.children.map(mesh=>mesh.instanceMatrix.version);
+  const colors=scene.children.map(mesh=>mesh.instanceColor?.version);
+  flowers.update(1);flowers.update(10);
+  assert.deepEqual(scene.children.map(mesh=>mesh.instanceMatrix.version),versions);
+  assert.deepEqual(scene.children.map(mesh=>mesh.instanceColor?.version),colors);
 });

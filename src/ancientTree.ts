@@ -22,6 +22,14 @@ export function createAncientOak() {
   const geometry = oak.branchesMesh.geometry,p = geometry.attributes.position,uv=geometry.attributes.uv;
   const barkColors=new Float32Array(p.count*3).fill(1),barkTint=new THREE.Color();
   const ringSize = oak.options.branch.segments[0] + 1;
+  // Give every branch the trunk's brown grain palette, including the smaller twigs.
+  for (let i=0;i<p.count;i++) {
+    const angle=uv.getX(i)*Math.PI*2,y=p.getY(i);
+    const grooves=.038*Math.sin(angle*7+y*.07+.65*Math.sin(angle*3-y*.08))+.019*Math.sin(angle*11-y*.13)+.008*Math.sin(angle*15+y*.3);
+    const valley=THREE.MathUtils.smoothstep(-grooves,-.015,.045);
+    barkTint.set('#d9c4ae').lerp(new THREE.Color('#594638'),valley*.55);
+    barkTint.toArray(barkColors,i*3);
+  }
   for (let ring = 0; ring <= oak.options.branch.sections[0]; ring++) {
     const center = new THREE.Vector3();
     for (let j = 0; j < ringSize - 1; j++) center.add(new THREE.Vector3().fromBufferAttribute(p,ring * ringSize + j));
@@ -38,7 +46,7 @@ export function createAncientOak() {
       // Continuous vertical grain avoids a repeated horizontal seam at every ring.
       uv.setY(i,y/9);
       const valley=THREE.MathUtils.smoothstep(-grooves,-.015,.045);
-      barkTint.set('#d9c4ae').lerp(new THREE.Color('#594638'),valley*.4);
+      barkTint.set('#d9c4ae').lerp(new THREE.Color('#594638'),valley*.55);
       barkTint.lerp(new THREE.Color('#807653'),Math.exp(-Math.max(0,y)*.16)*(.04+.07*(.5+.5*Math.sin(angle*3))));
       barkTint.toArray(barkColors,i*3);
     }
@@ -74,11 +82,11 @@ export function createAncientOak() {
   geometry.setAttribute('color',new THREE.BufferAttribute(barkColors,3));
   // The library's dark colour map multiplied by brown tint crushed the trunk to black.
   // Use the brown palette directly; normal mapping and geometry retain the bark grain.
-  bark.map=null; bark.aoMapIntensity=.25;
-  bark.vertexColors=true; bark.color.set('#8d715b'); bark.normalScale.set(.65,.65);
+  bark.map=null; bark.aoMapIntensity=.4;
+  bark.vertexColors=true; bark.color.set('#967a61'); bark.normalScale.set(.95,.95);
   bark.shininess=1; bark.specular.set('#2b221a');
   // A small indirect-light floor keeps bark readable beneath the dense crown.
-  bark.emissive.set('#6b503c'); bark.emissiveIntensity=.14; bark.needsUpdate=true;
+  bark.emissive.set('#6b503c'); bark.emissiveIntensity=.1; bark.needsUpdate=true;
   oak.branchesMesh.castShadow = oak.branchesMesh.receiveShadow = true;
   oak.leavesMesh.castShadow = oak.leavesMesh.receiveShadow = true;
   const roots = new THREE.Group(); roots.name = 'Ancient oak exposed roots';
@@ -98,7 +106,7 @@ export function createAncientOak() {
     for (let j = 0; j < v.count; j++) {
       const t = Math.floor(j / 11) / 18,center = curve.getPointAt(t),radius = (.46 + Math.sin(i * 2.1) * .08) * Math.pow(1 - t,1.6) + .02;
       v.setXYZ(j,center.x + (v.getX(j) - center.x) * radius,center.y + (v.getY(j) - center.y) * radius * .65,center.z + (v.getZ(j) - center.z) * radius);
-      const groove=.2+.12*Math.sin((j%11)/10*Math.PI*6+t*2+i);
+      const groove=.23+.16*Math.sin((j%11)/10*Math.PI*6+t*2+i);
       barkTint.set('#d9c4ae').lerp(new THREE.Color('#594638'),groove);
       barkTint.lerp(new THREE.Color('#807653'),.07);
       barkTint.toArray(rootColors,j*3);

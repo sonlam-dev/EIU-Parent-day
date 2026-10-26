@@ -1,8 +1,15 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
-import {WishPresentation} from '../src/WishPresentation.ts';
+import {WishPresentation,nextWishInterval} from '../src/WishPresentation.ts';
 const wish=(i,status='approved')=>({id:`wish-${i}`,name:`Guest ${i}`,recipient:'Gia đình',message:`Lời yêu thương số ${i}`,color:'green',status,created_at:new Date(1700000000000+i*1000).toISOString()});
 const ids=rows=>rows.map(w=>w.id);
+
+test('Each arrival gets a fresh random interval between one and three seconds',()=>{
+  let calls=0;
+  const random=()=>[0,.5,1][calls++];
+  assert.deepEqual([nextWishInterval(random),nextWishInterval(random),nextWishInterval(random)],[1000,2000,3000]);
+  assert.equal(calls,3);
+});
 
 test('History restores all letters and the latest five cards without replay',()=>{
   const display=new WishPresentation(),snapshot=Array.from({length:9},(_,i)=>wish(i));

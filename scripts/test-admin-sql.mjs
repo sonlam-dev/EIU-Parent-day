@@ -28,6 +28,8 @@ try {
   await db.exec(migration);await db.exec(migration);
   await db.exec(fs.readFileSync('supabase/migrations/004_fix_admin_delete.sql','utf8'));
   await db.exec(fs.readFileSync('supabase/migrations/005_parent_to_child_samples.sql','utf8'));
+  const upgrade=fs.readFileSync('supabase/migrations/006_ten_colorful_parent_wishes.sql','utf8');
+  await db.exec(upgrade);await db.exec(upgrade);
   const samples=(await db.query('select recipient,message from public.emergency_samples')).rows;
   assert.ok(samples.every(sample=>sample.recipient==='Con yêu' && /ba mẹ/i.test(sample.message)));
   const definition=await value("select pg_get_functiondef('public.admin_delete_all_wishes(uuid,text)'::regprocedure) as value");
@@ -44,17 +46,21 @@ try {
   await assert.rejects(()=>db.query('select * from public.emergency_samples'),/permission denied/i);
   await assert.rejects(()=>db.query('delete from public.wishes'),/permission denied/i);
   let total=0;
-  for(let i=0;i<4;i++) {
+  for(let i=0;i<13;i++) {
     const id=randomUUID(),count=await value('select public.admin_emergency_wishes($1) as value',[id]);
-    assert.ok(count>=30 && count<=40);total+=count;
+    assert.equal(count,10);total+=count;
     assert.equal(await value('select public.admin_emergency_wishes($1) as value',[id]),count);
     assert.equal(await value('select count(*)::int as value from public.wishes'),total);
+    const batch=(await db.query('select color from public.wishes order by created_at desc limit 10')).rows;
+    assert.equal(new Set(batch.map(w=>w.color)).size,4);
   }
   const rows=(await db.query('select * from public.wishes order by created_at,id')).rows;
   assert.equal(new Set(rows.slice(0,120).map(w=>w.message)).size,120);
+  assert.equal(rows[120].message,rows[0].message);
+  for(const color of ['green','gold','pink','sage']) assert.equal(rows.slice(0,120).filter(w=>w.color===color).length,30);
   assert.equal(new Set(rows.map(w=>w.id)).size,total);
   assert.ok(rows.every(w=>w.status==='approved' && w.source==='emergency'));
-  console.log('PASS: repeated presses create 30–40 approved letters, 120 samples cycle, retries do not duplicate.');
+  console.log('PASS: each press creates exactly 10 letters with four colors, 120 samples cycle, retries do not duplicate.');
   await identity('postgres');
   await db.exec(`insert into public.wishes(id,name,recipient,message,color,status)
     select gen_random_uuid(),'Guest','Family','A meaningful test wish','green',s

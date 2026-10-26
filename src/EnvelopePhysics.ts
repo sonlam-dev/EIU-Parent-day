@@ -7,7 +7,9 @@ export function resolveEnvelopeContacts(bodies:EnvelopeBody[],diameter:number) {
   for (let i=0;i<bodies.length;i++) {
     const a=bodies[i],cx=Math.floor(a.x/diameter),cy=Math.floor(a.y/diameter),cz=Math.floor(a.z/diameter);
     for (let x=cx-1;x<=cx+1;x++) for (let y=cy-1;y<=cy+1;y++) for (let z=cz-1;z<=cz+1;z++) {
-      for (const j of cells.get(`${x}:${y}:${z}`) || []) {
+      const neighbors=cells.get(`${x}:${y}:${z}`);
+      if (!neighbors) continue;
+      for (const j of neighbors) {
         const b=bodies[j]; let dx=a.x-b.x,dy=a.y-b.y,dz=a.z-b.z;
         const distance=Math.hypot(dx,dy,dz);
         if (distance>=diameter) continue;

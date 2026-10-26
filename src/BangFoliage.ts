@@ -23,21 +23,21 @@ function createVeinTexture() {
   const canvas=document.createElement('canvas'); canvas.width=canvas.height=512;
   const ctx=canvas.getContext('2d')!;
   const gradient=ctx.createLinearGradient(0,0,512,0);
-  gradient.addColorStop(0,'#b9bfa7'); gradient.addColorStop(.43,'#f2f0d9'); gradient.addColorStop(.51,'#fff4d7'); gradient.addColorStop(.59,'#e9ebd3'); gradient.addColorStop(1,'#c4c9ae');
+  gradient.addColorStop(0,'#929e7c'); gradient.addColorStop(.43,'#eef0d6'); gradient.addColorStop(.51,'#fff4d7'); gradient.addColorStop(.59,'#e5eacb'); gradient.addColorStop(1,'#a0ac88');
   ctx.fillStyle=gradient; ctx.fillRect(0,0,512,512);
   // Fine mottling and slightly different vein paths avoid a flat, uniform plastic surface.
   const rand=(i:number) => { const v=Math.sin(i * 127.1 + 39.7) * 43758.5453; return v - Math.floor(v); };
   for (let i=0;i<4000;i++) { ctx.fillStyle=i % 2 ? 'rgba(115,104,66,.025)' : 'rgba(255,255,236,.1)'; ctx.fillRect(rand(i) * 512,rand(i + 800) * 512,1 + rand(i + 900) * 2,1 + rand(i + 1000) * 2); }
-  ctx.strokeStyle='#d0bd87'; ctx.lineWidth=4; ctx.beginPath(); ctx.moveTo(256,512); ctx.bezierCurveTo(250,350,263,170,256,0); ctx.stroke();
-  ctx.strokeStyle='rgba(104,119,69,.42)'; ctx.lineWidth=1.4;
+  ctx.strokeStyle='#8e8054'; ctx.lineWidth=5; ctx.beginPath(); ctx.moveTo(256,512); ctx.bezierCurveTo(250,350,263,170,256,0); ctx.stroke();
+  ctx.strokeStyle='rgba(82,103,51,.65)'; ctx.lineWidth=2.4;
   for (let i=0;i<10;i++) {
     const t=.15 + i * .074,width=.34 * Math.pow(Math.sin(Math.PI * t),.64) * (.42 + .72 * t),y=(1 - t) * 512;
     for (const side of [-1,1]) {
       const endX=256 + side * width / .8 * 512 * .92,endY=y - 42 - rand(i + side + 20) * 15;
       ctx.beginPath(); ctx.moveTo(256,y + 18); ctx.bezierCurveTo(256 + side * 35,y + 6,endX - side * 10,endY + 20,endX,endY); ctx.stroke();
-      ctx.lineWidth=.6;
+      ctx.lineWidth=1;
       for (let k=1;k<=4;k++) { const f=k / 5,x=THREE.MathUtils.lerp(256,endX,f),yy=THREE.MathUtils.lerp(y + 18,endY,f); ctx.beginPath(); ctx.moveTo(x,yy); ctx.quadraticCurveTo(x + side * 10,yy - 20,x + side * 12,yy - 40); ctx.stroke(); }
-      ctx.lineWidth=1.4;
+      ctx.lineWidth=2.4;
     }
   }
   const texture=new THREE.CanvasTexture(canvas); texture.colorSpace=THREE.SRGBColorSpace; texture.anisotropy=8;
@@ -45,7 +45,7 @@ function createVeinTexture() {
 }
 
 export function createLeafMaterial(texture:THREE.Texture,time={value:0}) {
-  const material=new THREE.MeshPhongMaterial({map:texture,color:'#ffffff',side:THREE.DoubleSide,shininess:7,specular:'#667849'});
+  const material=new THREE.MeshPhongMaterial({map:texture,color:'#ffffff',side:THREE.DoubleSide,shininess:5,specular:'#465b32'});
   material.onBeforeCompile=shader => {
     shader.uniforms.uTime=time; material.userData.shader=shader;
     shader.vertexShader=`uniform float uTime;\n${shader.vertexShader}`.replace('#include <begin_vertex>',`

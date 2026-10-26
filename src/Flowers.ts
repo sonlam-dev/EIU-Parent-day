@@ -2,28 +2,60 @@ import * as THREE from 'three';
 import { terrainHeight } from './Meadow.ts';
 import { createFlowerLayout,flowerRandom } from './FlowerLayout.ts';
 
-/** Yellow cosmos: separate stems, pointed leaves, cupped petals and raised orange disks. */
+/** White half preserves distant petals; the other half details one foreground bed. */
+function petalDetailTexture() {
+  const canvas=document.createElement('canvas');canvas.width=512;canvas.height=256;
+  const ctx=canvas.getContext('2d')!;
+  ctx.fillStyle='#ffffff';ctx.fillRect(0,0,512,256);
+  const shading=ctx.createLinearGradient(256,0,512,0);
+  shading.addColorStop(0,'#b7b7b7');shading.addColorStop(.3,'#eeeeee');
+  shading.addColorStop(.5,'#ffffff');shading.addColorStop(.7,'#eeeeee');shading.addColorStop(1,'#b7b7b7');
+  ctx.fillStyle=shading;ctx.fillRect(256,0,256,256);
+  ctx.save();ctx.translate(384,256);ctx.scale(256/.34,-256/.41);
+  ctx.strokeStyle='#82745b';ctx.lineWidth=.006;ctx.lineJoin='round';
+  ctx.beginPath();ctx.moveTo(0,0);ctx.bezierCurveTo(-.13,.11,-.17,.32,-.08,.41);
+  ctx.quadraticCurveTo(0,.37,.08,.41);ctx.bezierCurveTo(.17,.32,.13,.11,0,0);ctx.stroke();
+  ctx.strokeStyle='#b6aa8a';ctx.lineWidth=.003;
+  for(const side of [-1,0,1]) {
+    ctx.beginPath();ctx.moveTo(0,.025);ctx.quadraticCurveTo(side*.065,.17,side*.065,.345);ctx.stroke();
+  }
+  ctx.restore();
+  const texture=new THREE.CanvasTexture(canvas);texture.colorSpace=THREE.SRGBColorSpace;
+  return texture;
+}
+
+/** Yellow cosmos: separate stems, pointed leaves, cupped petals and raised brown disks. */
 export function createYellowFlowers(scene: THREE.Scene,reducedMotion: boolean) {
   const layout=createFlowerLayout(),count=layout.positions.length,rand=flowerRandom;
   const shape = new THREE.Shape(); shape.moveTo(0,0); shape.bezierCurveTo(-.13,.11,-.17,.32,-.08,.41); shape.quadraticCurveTo(0,.37,.08,.41); shape.bezierCurveTo(.17,.32,.13,.11,0,0);
   const petalGeometry = new THREE.ShapeGeometry(shape,3); const pp = petalGeometry.attributes.position;
   for (let i = 0; i < pp.count; i++) pp.setZ(i,Math.pow(pp.getY(i),2) * .65); petalGeometry.computeVertexNormals();
+  const uv=petalGeometry.attributes.uv;
+  for(let i=0;i<uv.count;i++) uv.setXY(i,pp.getX(i)/.34+.5,pp.getY(i)/.41);
   const petalMaterial = new THREE.MeshStandardMaterial({color:'#ffc61e',roughness:.74,side:THREE.DoubleSide,emissive:'#9b5a00',emissiveIntensity:.1});
+  petalMaterial.map=petalDetailTexture();
   const petals = new THREE.InstancedMesh(petalGeometry,petalMaterial,count * 8);
-  const centers = new THREE.InstancedMesh(new THREE.SphereGeometry(.085,8,5),new THREE.MeshStandardMaterial({color:'#c88114',roughness:.95}),count);
+  const centers = new THREE.InstancedMesh(new THREE.SphereGeometry(.085,8,5),new THREE.MeshStandardMaterial({color:'#9b591f',roughness:.95}),count);
   const stems = new THREE.InstancedMesh(new THREE.CylinderGeometry(.009,.015,1,5),new THREE.MeshStandardMaterial({color:'#527b30',roughness:1}),count);
   const leafShape = new THREE.Shape(); leafShape.moveTo(0,0); leafShape.quadraticCurveTo(-.08,.22,0,.5); leafShape.quadraticCurveTo(.08,.22,0,0);
   const leaves = new THREE.InstancedMesh(new THREE.ShapeGeometry(leafShape,3),new THREE.MeshStandardMaterial({color:'#668b34',roughness:1,side:THREE.DoubleSide}),count * 2);
   const dummy = new THREE.Object3D(),orientation = new THREE.Object3D(),base = new THREE.Vector3(),color = new THREE.Color();
   const flowers: {x:number;z:number;y:number;h:number;s:number;tilt:number;phase:number}[] = [];
+  // Pick one existing bed facing the initial camera, without adding flowers or meshes.
+  const detailPatch=layout.patches.reduce((best,patch)=>(patch.x-6)**2+(patch.z-7)**2<(best.x-6)**2+(best.z-7)**2 ? patch : best);
+  const detail=new Float32Array(count*8);
+  petals.name='Yellow cosmos petals';centers.name='Yellow cosmos centers';
   for (let i = 0; i < count; i++) {
     const {x,z}=layout.positions[i],r=Math.hypot(x,z);
+    const detailed=(x-detailPatch.x)**2+(z-detailPatch.z)**2<=2**2;
+    if(detailed) detail.fill(1,i*8,i*8+8);
     const patch=.9 + .1*Math.sin(x*.23+Math.cos(z*.18));
     const taper=1-THREE.MathUtils.smoothstep(r,24,42)*.75;
     flowers.push({x,z,y:terrainHeight(x,z),h:(1.05 + rand(i + 13) * .85)*patch*taper,s:(.55 + rand(i + 74) * .6)*taper,tilt:(rand(i + 99) - .5) * .5,phase:rand(i + 41) * Math.PI * 2});
     petals.setColorAt(i * 8,color.setHSL(.12 + rand(i) * .025,.85,.55 + rand(i + 8) * .08));
     for (let j = 1; j < 8; j++) petals.setColorAt(i * 8 + j,color);
   }
+  petalGeometry.setAttribute('aFlowerDetail',new THREE.InstancedBufferAttribute(detail,1));
   function update(time: number) {
     flowers.forEach((f,i) => {
       const sway = reducedMotion ? 0 : Math.sin(time * .9 + f.x * .13 + f.z * .1) * .045;
@@ -53,8 +85,14 @@ export function createYellowFlowers(scene: THREE.Scene,reducedMotion: boolean) {
         vec4 mvPosition=viewMatrix * flowerWorld;
         gl_Position=projectionMatrix * mvPosition;
       `);
+      if(mesh===petals) {
+        shader.vertexShader=`attribute float aFlowerDetail;\n${shader.vertexShader}`.replace('#include <uv_vertex>',`
+          #include <uv_vertex>
+          vMapUv.x=(vMapUv.x+aFlowerDetail)*.5;
+        `);
+      }
     };
-    material.customProgramCacheKey=() => 'sparse-wildflower-wind-v1';
+    material.customProgramCacheKey=() => mesh===petals ? 'single-bed-petal-detail-v1' : 'sparse-wildflower-wind-v1';
   }
   return {lightTargets:layout.patches,update(time:number){wind.value=reducedMotion ? 0 : time;}};
 }

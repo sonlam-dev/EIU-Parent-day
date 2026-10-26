@@ -169,12 +169,12 @@ begin
   end if;
   if (select count(*) from public.emergency_samples)<>120 then raise exception 'SAMPLES_NOT_READY'; end if;
   select next_index into start_index from public.emergency_cursor where singleton=true for update;
-  batch_count:=30+floor(random()*11)::integer;
+  batch_count:=10;
   select greatest(clock_timestamp(),coalesce(max(created_at)+interval '1 millisecond',clock_timestamp()))
     into batch_time from public.wishes;
   insert into public.wishes(id,name,recipient,message,color,status,source,created_at)
   select gen_random_uuid(),'EIU Parent Day',s.recipient,s.message,
-    (array['green','gold','pink','sage'])[(i%4)+1],'approved','emergency',batch_time+i*interval '1 millisecond'
+    (array['green','gold','pink','sage'])[((start_index+i)%4)::integer+1],'approved','emergency',batch_time+i*interval '1 millisecond'
   from generate_series(0,batch_count-1) as i
   join public.emergency_samples s on s.id=((start_index+i)%120)::integer+1;
   update public.emergency_cursor set next_index=(start_index+batch_count)%120 where singleton=true;
