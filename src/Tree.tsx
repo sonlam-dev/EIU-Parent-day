@@ -13,7 +13,7 @@ import { RenderQuality,renderPixelRatio } from './RenderQuality';
 import EnvelopeWish from './EnvelopeWish';
 import { createMorningSky } from './MorningSky';
 import { daylightBalance } from './Daylight';
-import eiuLogo from './assets/eiu-logo.png';
+
 import {Sprout} from 'lucide-react';
 import {waitForSceneTextures} from './SceneAssets';
 
@@ -57,10 +57,6 @@ export default function Tree(props: Props) {
     }; applyView.current();
     const sunDirection=new THREE.Vector3(-.95,.28,-1).normalize();
     createClearSky(scene,sunDirection);
-    const logoTexture=new THREE.TextureLoader().load(eiuLogo); logoTexture.colorSpace=THREE.SRGBColorSpace;
-    const trademark=new THREE.Sprite(new THREE.SpriteMaterial({map:logoTexture,transparent:true,opacity:.38,depthWrite:false,fog:false,toneMapped:false}));
-    trademark.name='EIU sky trademark'; scene.add(trademark);
-    const logoRay=new THREE.Vector3();
     scene.add(new THREE.HemisphereLight('#e4f0ff','#a6b58c',1.85));
     // Keep the sun fixed in the world; reflected light gently balances each viewing angle.
     const fill=new THREE.DirectionalLight('#fff5e5',.65); fill.target.position.set(0,7,0); scene.add(fill,fill.target);
@@ -157,15 +153,6 @@ export default function Tree(props: Props) {
       if (Math.abs(camera.zoom-state.current.view.zoom)>.0001) { camera.zoom=zoom; camera.updateProjectionMatrix(); }
       controls.autoRotate = state.current.view.autoRotate && !motion.matches && !reading.current; controls.autoRotateSpeed = state.current.view.speed * .8; controls.update(dt);
       morning.update(now,camera); meadow.update(now); flowers.update(now); decor.update(now); oak.update(motion.matches ? 0 : now);
-      // Place the mark in the lower-left sky quadrant relative to the tree canopy.
-      camera.updateMatrixWorld();
-      logoRay.set(camera.aspect<1 ? -.48 : -.64,camera.aspect<1 ? .18 : .06,.5).unproject(camera).sub(camera.position).normalize();
-      trademark.position.copy(camera.position).addScaledVector(logoRay,160);
-      const logoAspect=logoTexture.image ? logoTexture.image.width/logoTexture.image.height : 3.5;
-      // Fill the lower-left sky while keeping a subtle watermark scale.
-      const logoWidthFraction=camera.aspect<1 ? .42 : .23;
-      const logoWidth=2*160*Math.tan(THREE.MathUtils.degToRad(camera.fov*.5))/camera.zoom*camera.aspect*logoWidthFraction;
-      trademark.scale.set(logoWidth,logoWidth/logoAspect,1);
       sun.position.copy(sunDirection).multiplyScalar(55).add(sun.target.position);
       fill.position.copy(camera.position); fill.position.y=Math.max(camera.position.y,12);
       viewingDirection.copy(camera.position).sub(controls.target);
