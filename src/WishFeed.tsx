@@ -4,6 +4,7 @@ import QRCode from 'qrcode';
 import type {Wish} from './types';
 import {colors} from './types';
 import EnvelopeWish from './EnvelopeWish';
+import eiuLogo from './assets/eiu-logo.png';
 
 type Props={wishes:Wish[];loading:boolean;connection:'connecting'|'live'|'retrying'|'demo';error:string;total:number;shareUrl:string};
 export default function WishFeed({wishes,loading,connection,error,total,shareUrl}:Props) {
@@ -36,7 +37,7 @@ export default function WishFeed({wishes,loading,connection,error,total,shareUrl
   const labels={connecting:'Đang kết nối',live:'Đang nhận lời chúc',retrying:'Đang kết nối lại',demo:''};
   return <>
     <section className="wish-feed" data-has-wishes={hasWishes} aria-label="Lời chúc và mã QR tham gia">
-      <header className="wish-feed-header"><span className="wish-feed-icon"><Mail size={20}/></span><div><span>EIU PARENT DAY</span><h1>Những lời yêu thương</h1></div><span className="wish-feed-total">{total.toLocaleString('vi')}<small>lá thư</small></span></header>
+      <header className="wish-feed-header"><div className="wish-feed-head-content"><div className="wish-feed-brand-row"><img src={eiuLogo} alt="EIU Logo" className="wish-feed-brand-logo" width="85" height="25" /><span className="wish-feed-brand-tag">PARENT DAY</span></div><h1>Những lời yêu thương</h1></div><span className="wish-feed-total">{total.toLocaleString('vi')}<small>lá thư</small></span></header>
       <div className="wish-feed-content">
         <div className="wish-invitation" aria-hidden={hasWishes}>
           <span className="wish-invitation-kicker"><QrCode size={18}/> QUÉT MÃ QR ĐỂ THAM GIA</span>

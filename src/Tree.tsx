@@ -68,6 +68,7 @@ export default function Tree(props: Props) {
     const morning=createMorningSky(scene,sunDirection,motion.matches,flowers.lightTargets);
     const shadowSun=new THREE.Vector3();
     const viewingDirection=new THREE.Vector3();
+    let windFactor=0;
     const {oak,roots,crownLift} = createAncientOak(); scene.add(oak,roots); oak.updateMatrixWorld(true);
     const bang = installBangFoliage(oak,crownLift);
     bang.texture.anisotropy = Math.min(16,renderer.capabilities.getMaxAnisotropy());
@@ -151,8 +152,11 @@ export default function Tree(props: Props) {
       const dt=Math.min(elapsed,.05); now += dt;
       const zoom=THREE.MathUtils.damp(camera.zoom,state.current.view.zoom,9,dt);
       if (Math.abs(camera.zoom-state.current.view.zoom)>.0001) { camera.zoom=zoom; camera.updateProjectionMatrix(); }
-      controls.autoRotate = state.current.view.autoRotate && !motion.matches && !reading.current; controls.autoRotateSpeed = state.current.view.speed * .8; controls.update(dt);
-      morning.update(now,camera); meadow.update(now); flowers.update(now); decor.update(now); oak.update(motion.matches ? 0 : now);
+      const isRotating = state.current.view.autoRotate && !motion.matches && !reading.current;
+      controls.autoRotate = isRotating; controls.autoRotateSpeed = state.current.view.speed * .8; controls.update(dt);
+      const targetWind = isRotating ? Math.min(1.4, Math.max(0.65, state.current.view.speed)) : 0;
+      windFactor = THREE.MathUtils.damp(windFactor, targetWind, 2.5, dt);
+      morning.update(now,camera); meadow.update(now); flowers.update(now); decor.update(now, windFactor); oak.update(motion.matches ? 0 : now);
       sun.position.copy(sunDirection).multiplyScalar(55).add(sun.target.position);
       fill.position.copy(camera.position); fill.position.y=Math.max(camera.position.y,12);
       viewingDirection.copy(camera.position).sub(controls.target);

@@ -157,9 +157,9 @@ export function createParentDayDecor(scene:THREE.Scene,anchors:THREE.Vector3[],r
     reserve(pendants.length); cards.count=threads.count=halos.count=pendants.length;
     dirty.clear(); layout(); initialized=true;
   }
-  function update(time:number) {
+  function update(time:number,windStrength:number=0) {
     const elapsed=Math.max(0,time-simulationTime); simulationTime=time;
-    lastTime=time; clock.value=time; wind.value=reducedMotion ? 0 : time;
+    lastTime=time; clock.value=time; wind.value=reducedMotion ? 0 : time*(1.0+windStrength*.35);
     const steps=Math.max(1,Math.ceil(Math.min(elapsed,.1)*120)),dt=Math.min(elapsed,.1)/steps;
     contacts=0;
     for (let step=0;step<steps;step++) {
@@ -172,12 +172,15 @@ export function createParentDayDecor(scene:THREE.Scene,anchors:THREE.Vector3[],r
         } else {
           const length=Math.max(1,p.anchor.distanceTo(p.position)),stiffness=9.81/length;
           const gust=Math.sin(at*.72+p.anchor.x*.22+p.anchor.z*.18)+.35*Math.sin(at*1.47+p.phase);
+          const breezeX=windStrength*(Math.sin(at*1.3+p.anchor.z*.25)*.28+.15*Math.sin(at*2.4+p.phase));
+          const breezeZ=windStrength*(Math.cos(at*1.1+p.anchor.x*.25)*.25+.12*Math.sin(at*2.1+p.phase));
           const rise=((b.x-p.position.x)**2+(b.z-p.position.z)**2)/(2*length);
-          b.vx+=((p.position.x+gust*.22-b.x)*stiffness-b.vx*1.15)*dt;
+          b.vx+=((p.position.x+gust*.22+breezeX-b.x)*stiffness-b.vx*1.15)*dt;
           b.vy+=((p.position.y+lift+rise-b.y)*45-b.vy*7)*dt;
-          b.vz+=((p.position.z+Math.cos(at*.63+p.phase)*.13-b.z)*stiffness-b.vz*1.15)*dt;
+          b.vz+=((p.position.z+Math.cos(at*.63+p.phase)*.13+breezeZ-b.z)*stiffness-b.vz*1.15)*dt;
           b.x+=b.vx*dt; b.y+=b.vy*dt; b.z+=b.vz*dt;
-          b.spin+=(-b.roll*18-b.spin*3.4)*dt; b.roll+=b.spin*dt;
+          b.spin+=((-b.roll*18-b.spin*3.4)+windStrength*Math.sin(at*3.1+p.phase)*2.0)*dt;
+          b.roll+=b.spin*dt;
         }
         bodies.push(b);
       }
@@ -187,7 +190,10 @@ export function createParentDayDecor(scene:THREE.Scene,anchors:THREE.Vector3[],r
     for (let i=0;i<pendants.length;i++) {
       const p=pendants[i],b=p.body,progress=THREE.MathUtils.clamp((time-p.born)/DROP_SECONDS,0,1);
       dummy.position.set(b.x,b.y,b.z);
-      euler.set(reducedMotion ? 0 : Math.sin(time*.8+p.phase)*.055,Math.sin(p.phase)*.35,reducedMotion ? Math.sin(p.phase)*.08 : Math.sin(time*.9+p.phase)*.07+b.roll-b.vx*.08);
+      const swayPitch=reducedMotion ? 0 : Math.sin(time*.8+p.phase)*.055+windStrength*(Math.sin(time*2.2+p.phase)*.11+.05);
+      const swayYaw=Math.sin(p.phase)*.35+(reducedMotion ? 0 : windStrength*Math.sin(time*1.4+p.phase*1.3)*.18);
+      const swayRoll=reducedMotion ? Math.sin(p.phase)*.08 : Math.sin(time*.9+p.phase)*.07+b.roll-b.vx*.08+windStrength*Math.cos(time*2.0+p.phase)*.10;
+      euler.set(swayPitch,swayYaw,swayRoll);
       rotation.setFromEuler(euler); dummy.quaternion.copy(orientation).multiply(rotation);
       dummy.scale.setScalar(progress<=0 ? .00001 : scale*(.9+.1*Math.sin(p.phase))); dummy.updateMatrix(); cards.setMatrixAt(i,dummy.matrix);
       if (dirty.has(i)) cards.setColorAt(i,tint.copy(p.color).lerp(highlightColor,p.id === focused ? .18 : 0));
@@ -195,7 +201,7 @@ export function createParentDayDecor(scene:THREE.Scene,anchors:THREE.Vector3[],r
       const cordLength=direction.length();
       dummy.position.copy(p.anchor).add(end).multiplyScalar(.5); dummy.quaternion.setFromUnitVectors(worldUp,direction.normalize());
       dummy.scale.set(progress<=0 ? .00001 : 1,Math.max(.00001,cordLength),progress<=0 ? .00001 : 1); dummy.updateMatrix(); threads.setMatrixAt(i,dummy.matrix);
-      cordSlack.setX(i,reducedMotion ? .025 : .045+(1-progress)*.18+Math.min(.16,Math.hypot(b.vx,b.vz)*.09));
+      cordSlack.setX(i,reducedMotion ? .025 : .045+(1-progress)*.18+Math.min(.22,Math.hypot(b.vx,b.vz)*.09+windStrength*.04));
     }
     cards.instanceMatrix.needsUpdate=true; threads.instanceMatrix.needsUpdate=true;
     if (dirty.size && cards.instanceColor) cards.instanceColor.needsUpdate=true;
