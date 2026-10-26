@@ -73,8 +73,8 @@ export function installBangFoliage(tree:Tree,crownLift=0) {
   const geometry=createBangLeafGeometry(),texture=createVeinTexture();
   const material=createLeafMaterial(texture);
   // Several small physical blades replace each pair of crossed photographic cards.
-  const sourceCount=Math.floor(positions.count / 8),fillCount=6000;
-  const count=sourceCount * 3 + fillCount,foliage=new THREE.InstancedMesh(geometry,material,count);
+  const sourceCount=Math.floor(positions.count / 8),fillCount=6000,gapCount=5184;
+  const count=sourceCount * 3 + fillCount + gapCount,foliage=new THREE.InstancedMesh(geometry,material,count);
   const anchors:THREE.Vector3[] = [],base=new THREE.Vector3(),top=new THREE.Vector3(),right=new THREE.Vector3(),up=new THREE.Vector3(),normal=new THREE.Vector3(),matrix=new THREE.Matrix4(),tint=new THREE.Color();
   const palette=['#476f3a','#567d43','#638b4d','#779a59','#89a76b','#9caf72','#b1b77d'];
   const random=(i:number) => THREE.MathUtils.seededRandom(i + 23399);
@@ -110,6 +110,37 @@ export function installBangFoliage(tree:Tree,crownLift=0) {
     small.compose(point,rotation,scale); matrix.multiplyMatrices(inverse,small);
     foliage.setMatrixAt(instance,matrix); foliage.setColorAt(instance++,tint.set(palette[Math.floor(random(i * 11 + 8) * palette.length)]));
   }
+  // Find underfilled pockets in the lower crown, then grow overlapping leaf clusters.
+  // Count nearby leaves first so the extra foliage targets gaps rather than thick areas.
+  const cells=new Map<string,number>(),cellSize=1.25;
+  for(const anchor of anchors) {
+    const key=`${Math.floor(anchor.x/cellSize)}:${Math.floor(anchor.y/cellSize)}:${Math.floor(anchor.z/cellSize)}`;
+    cells.set(key,(cells.get(key)||0)+1);
+  }
+  const pockets:{point:THREE.Vector3;density:number}[]=[];
+  for(let x=-5.5;x<=6;x+=1.1) for(let y=7.9;y<=11.6;y+=.85) for(let z=-4.8;z<=4.8;z+=1.1) {
+    if(((x-.4)/6)**2+((y-9.6)/2.5)**2+(z/5.2)**2>1) continue;
+    const point=new THREE.Vector3(x,y+crownLift,z);
+    const cx=Math.floor(point.x/cellSize),cy=Math.floor(point.y/cellSize),cz=Math.floor(point.z/cellSize);
+    let density=0;
+    for(let dx=-1;dx<=1;dx++) for(let dy=-1;dy<=1;dy++) for(let dz=-1;dz<=1;dz++) density+=cells.get(`${cx+dx}:${cy+dy}:${cz+dz}`)||0;
+    pockets.push({point,density});
+  }
+  pockets.sort((a,b)=>a.density-b.density);
+  const clusters:THREE.Vector3[]=[];
+  for(const pocket of pockets) {
+    if(clusters.every(p=>p.distanceToSquared(pocket.point)>.95**2)) clusters.push(pocket.point);
+    if(clusters.length===72) break;
+  }
+  for(let i=0;i<gapCount;i++) {
+    const seed=900000+i*13,cluster=clusters[i%clusters.length];
+    const angle=random(seed)*Math.PI*2,vertical=random(seed+1)*2-1,r=Math.cbrt(random(seed+2)),ring=Math.sqrt(1-vertical*vertical);
+    point.copy(cluster).add(new THREE.Vector3(Math.cos(angle)*ring*r*.85,vertical*r*.65,Math.sin(angle)*ring*r*.85));
+    rotation.setFromEuler(new THREE.Euler(random(seed+3)*Math.PI,random(seed+4)*Math.PI*2,random(seed+5)*Math.PI*2));
+    scale.setScalar(.42+random(seed+6)*.3); small.compose(point,rotation,scale); matrix.multiplyMatrices(inverse,small);
+    foliage.setMatrixAt(instance,matrix); foliage.setColorAt(instance++,tint.set(palette[Math.floor(random(seed+7)*palette.length)]));
+  }
+  foliage.userData.gapClusters=clusters.length;
   foliage.castShadow=foliage.receiveShadow=true; foliage.frustumCulled=false;
   tree.remove(source); source.geometry.dispose(); (source.material as THREE.Material).dispose(); tree.leavesMesh=foliage; tree.add(foliage);
   return {geometry,texture,anchors};

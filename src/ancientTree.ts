@@ -10,8 +10,8 @@ export function createAncientOak() {
   oak.options.branch.angle = {1:58,2:46,3:32};
   oak.options.branch.gnarliness = {0:.022,1:.085,2:.07,3:.05};
   oak.options.branch.force.strength = .012;
-  oak.options.branch.segments = {0:20,1:10,2:7,3:5};
-  oak.options.branch.sections = {0:32,1:15,2:10,3:6};
+  oak.options.branch.segments = {0:32,1:12,2:7,3:5};
+  oak.options.branch.sections = {0:48,1:18,2:10,3:6};
   oak.options.leaves.count = 42; oak.options.leaves.size = 7.2; oak.options.leaves.sizeVariance = .38; oak.options.leaves.tint = 0xc7dca6;
   oak.generate();
   // The denser crown exceeds the library's 16-bit foliage index range. Preserve all leaf faces.
@@ -19,7 +19,8 @@ export function createAncientOak() {
     oak.leavesMesh.geometry.setIndex(new THREE.BufferAttribute(new Uint32Array(oak.leaves.indices),1));
   }
   // Work around each trunk ring's actual center so the bark follows its natural curve.
-  const geometry = oak.branchesMesh.geometry,p = geometry.attributes.position;
+  const geometry = oak.branchesMesh.geometry,p = geometry.attributes.position,uv=geometry.attributes.uv;
+  const barkColors=new Float32Array(p.count*3).fill(1),barkTint=new THREE.Color();
   const ringSize = oak.options.branch.segments[0] + 1;
   for (let ring = 0; ring <= oak.options.branch.sections[0]; ring++) {
     const center = new THREE.Vector3();
@@ -29,11 +30,17 @@ export function createAncientOak() {
       const i = ring * ringSize + j,x = p.getX(i) - center.x,z = p.getZ(i) - center.z,y = center.y;
       const angle = Math.atan2(z,x);
       const flare = Math.exp(-Math.max(0,y) * .19) * (.28 + .09 * Math.sin(angle * 5 + .6));
-      const grooves = .035 * Math.sin(angle * 5 + y * .11 + .5 * Math.sin(angle * 3 - y * .08)) + .018 * Math.sin(angle * 11 - y * .16);
+      const grooves = .038 * Math.sin(angle * 7 + y * .07 + .65 * Math.sin(angle * 3 - y * .08)) + .019 * Math.sin(angle * 11 - y * .13) + .008 * Math.sin(angle * 15 + y * .3);
       const knot = .15 * Math.exp(-Math.pow((y - 15) / 3.8,2)) * Math.exp(-Math.pow(Math.atan2(Math.sin(angle - .7),Math.cos(angle - .7)) / .65,2))
         + .11 * Math.exp(-Math.pow((y - 27) / 4,2)) * Math.exp(-Math.pow(Math.atan2(Math.sin(angle + 1.8),Math.cos(angle + 1.8)) / .7,2));
       const scale = 1 + flare + grooves + knot;
       p.setXYZ(i,center.x + x * scale,p.getY(i),center.z + z * scale);
+      // Continuous vertical grain avoids a repeated horizontal seam at every ring.
+      uv.setY(i,y/9);
+      const valley=THREE.MathUtils.smoothstep(-grooves,-.015,.045);
+      barkTint.set('#f3e4cf').lerp(new THREE.Color('#857566'),valley*.32);
+      barkTint.lerp(new THREE.Color('#7e8863'),Math.exp(-Math.max(0,y)*.16)*(.05+.1*(.5+.5*Math.sin(angle*3))));
+      barkTint.toArray(barkColors,i*3);
     }
   }
   // Lift a compact, deep crown above a clear lower trunk. The shared warp keeps all joints attached.
@@ -41,8 +48,8 @@ export function createAncientOak() {
     const vertices = mesh.geometry.attributes.position;
     for (let i = 0; i < vertices.count; i++) {
       const x = vertices.getX(i),y = vertices.getY(i),z = vertices.getZ(i);
-      const bendX = .65 * Math.sin(y * .065) + .4 * (1 - Math.cos(y * .04));
-      const bendZ = .45 * Math.sin(y * .09);
+      const bendX = 3.2 * Math.sin(y * .065) + 1.35 * (1 - Math.cos(y * .045));
+      const bendZ = 1.5 * Math.sin(y * .09) - .8 * Math.sin(y * .037);
       vertices.setXYZ(i,x + bendX,y <= 30 ? y : 30 + (y - 30) * .56,z + bendZ);
     }
     mesh.geometry.computeVertexNormals(); mesh.geometry.computeBoundingSphere();
@@ -64,7 +71,8 @@ export function createAncientOak() {
     mesh.geometry.computeVertexNormals(); mesh.geometry.computeBoundingBox(); mesh.geometry.computeBoundingSphere();
   }
   const bark = oak.branchesMesh.material as THREE.MeshPhongMaterial;
-  bark.color.set('#afa18b'); bark.normalScale.set(1.35,1.35); bark.shininess = 2;
+  geometry.setAttribute('color',new THREE.BufferAttribute(barkColors,3));
+  bark.vertexColors=true; bark.color.set('#baad98'); bark.normalScale.set(1.15,1.15); bark.shininess = 1; bark.specular.set('#29251f');
   oak.branchesMesh.castShadow = oak.branchesMesh.receiveShadow = true;
   oak.leavesMesh.castShadow = oak.leavesMesh.receiveShadow = true;
   const roots = new THREE.Group(); roots.name = 'Ancient oak exposed roots';

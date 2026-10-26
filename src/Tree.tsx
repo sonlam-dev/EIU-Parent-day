@@ -30,13 +30,12 @@ export default function Tree(props: Props) {
     try { renderer = new THREE.WebGLRenderer({antialias:true,powerPreference:'high-performance'}); }
     catch { setFailed(true); return; }
     renderer.setPixelRatio(1); renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-    // The sun and branches stay fixed. Cache this expensive pass instead of
-    // drawing every leaf a second time on every animation frame.
+    // Refresh shadows only after a meaningful change in the viewing/sun angle.
     renderer.shadowMap.autoUpdate=false; renderer.shadowMap.needsUpdate=true;
     renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.toneMappingExposure = 1;
     el.appendChild(renderer.domElement); renderer.domElement.setAttribute('aria-label','Cây tri ân 3D với tán lá nhỏ, dày. Mỗi lời chúc được treo lên cây bằng một bao thư thả dây xuống.');
-    const scene = new THREE.Scene(); scene.background = new THREE.Color('#d5e6eb'); scene.fog = new THREE.FogExp2('#dce5d7',.0075);
-    const camera = new THREE.PerspectiveCamera(38,1,.1,400); camera.position.set(21,11,34); camera.lookAt(0,7,0);
+    const scene = new THREE.Scene(); scene.background = new THREE.Color('#93c8f0');
+    const camera = new THREE.PerspectiveCamera(38,1,.1,3000); camera.position.set(21,11,34); camera.lookAt(0,7,0);
     const controls = new OrbitControls(camera,renderer.domElement); controls.target.set(0,7,0); controls.enableDamping = true; controls.enablePan = false;
     controls.minDistance = 15; controls.maxDistance = 55; controls.minPolarAngle = .55; controls.maxPolarAngle = Math.PI * .49;
     let lastReset = state.current.view.reset;
@@ -45,16 +44,17 @@ export default function Tree(props: Props) {
       if (lastReset !== state.current.view.reset) { lastReset = state.current.view.reset; camera.position.set(21,11,34); controls.target.set(0,7,0); controls.update(); }
     }; applyView.current();
     const sunDirection=new THREE.Vector3(-.95,.18,-1).normalize();
-    const sky = new Sky(); sky.scale.setScalar(350); sky.material.uniforms.turbidity.value = 3.8; sky.material.uniforms.rayleigh.value = 1.8;
-    sky.material.uniforms.mieCoefficient.value = .004; sky.material.uniforms.mieDirectionalG.value = .86;
+    const sky = new Sky(); sky.scale.setScalar(2000); sky.material.uniforms.turbidity.value = 1.6; sky.material.uniforms.rayleigh.value = 2.1;
+    sky.material.uniforms.mieCoefficient.value = .002; sky.material.uniforms.mieDirectionalG.value = .86;
     sky.material.uniforms.sunPosition.value.copy(sunDirection); scene.add(sky);
     scene.add(new THREE.HemisphereLight('#e4f0ff','#829266',1.8));
-    const sun = new THREE.DirectionalLight('#ffe7bf',2.9); sun.target.position.set(0,5,0); sun.position.copy(sunDirection).multiplyScalar(55).add(sun.target.position); sun.castShadow = true;
+    const sun = new THREE.DirectionalLight('#fff0d6',3.05); sun.target.position.set(0,5,0); sun.position.copy(sunDirection).multiplyScalar(55).add(sun.target.position); sun.castShadow = true;
     sun.shadow.mapSize.set(1024,1024); sun.shadow.camera.left = -25; sun.shadow.camera.right = 25; sun.shadow.camera.top = 24; sun.shadow.camera.bottom = -20; sun.shadow.camera.far = 100; sun.shadow.normalBias = .045; sun.shadow.bias = -.0002; scene.add(sun,sun.target);
     const motion = matchMedia('(prefers-reduced-motion: reduce)');
-    const morning=createMorningSky(scene,sunDirection,motion.matches);
     const meadow = createMeadow(scene,motion.matches);
     const flowers = createYellowFlowers(scene,motion.matches);
+    const morning=createMorningSky(scene,sunDirection,motion.matches,flowers.lightTargets);
+    const shadowSun=new THREE.Vector3();
     const {oak,roots,crownLift} = createAncientOak(); scene.add(oak,roots); oak.updateMatrixWorld(true);
     const bang = installBangFoliage(oak,crownLift);
     bang.texture.anisotropy = Math.min(16,renderer.capabilities.getMaxAnisotropy());
@@ -110,6 +110,11 @@ export default function Tree(props: Props) {
       frame = requestAnimationFrame(render); const elapsed=clock.getDelta(); if (document.hidden) return; const dt=Math.min(elapsed,.12); now += dt;
       controls.autoRotate = state.current.view.autoRotate && !motion.matches && !reading.current; controls.autoRotateSpeed = state.current.view.speed * .8; controls.update(dt);
       morning.update(now,camera); meadow.update(now); flowers.update(now); decor.update(now); oak.update(motion.matches ? 0 : now);
+      sky.material.uniforms.sunPosition.value.copy(sunDirection);
+      sun.position.copy(sunDirection).multiplyScalar(55).add(sun.target.position);
+      if(shadowSun.dot(sunDirection)<.9996) { shadowSun.copy(sunDirection); renderer.shadowMap.needsUpdate=true; }
+      const azimuth=Math.atan2(camera.position.x,camera.position.z);
+      renderer.toneMappingExposure=THREE.MathUtils.damp(renderer.toneMappingExposure,1+.025*Math.sin(azimuth)+.01*Math.cos(azimuth*2),2,dt);
       renderer.render(scene,camera);
       if (elapsed > 0 && elapsed < .5) { sampleTime+=elapsed; sampleFrames++; }
       if (sampleTime >= 2) {

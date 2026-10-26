@@ -23,9 +23,9 @@ function soilTexture() {
   return texture;
 }
 
-/** Continuous green meadow, with grass extending into the morning haze. */
+/** Continuous green meadow, with grass extending to the horizon. */
 export function createMeadow(scene:THREE.Scene,reducedMotion:boolean) {
-  const groundGeometry=new THREE.PlaneGeometry(360,360,180,180); groundGeometry.rotateX(-Math.PI / 2);
+  const groundGeometry=new THREE.PlaneGeometry(1200,1200,300,300); groundGeometry.rotateX(-Math.PI / 2);
   const p=groundGeometry.attributes.position,groundColors=new Float32Array(p.count * 3),color=new THREE.Color();
   const green=new THREE.Color('#819b57'),variation=new THREE.Color('#6e8c4a');
   for (let i=0;i<p.count;i++) {

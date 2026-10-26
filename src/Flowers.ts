@@ -1,10 +1,10 @@
 import * as THREE from 'three';
 import { terrainHeight } from './Meadow.ts';
+import { createFlowerLayout,flowerRandom } from './FlowerLayout.ts';
 
 /** Yellow cosmos: separate stems, pointed leaves, cupped petals and raised orange disks. */
 export function createYellowFlowers(scene: THREE.Scene,reducedMotion: boolean) {
-  const count = 1800;
-  const rand = (n: number) => { const v = Math.sin(n * 127.1 + 91.7) * 43758.5453; return v - Math.floor(v); };
+  const layout=createFlowerLayout(),count=layout.positions.length,rand=flowerRandom;
   const shape = new THREE.Shape(); shape.moveTo(0,0); shape.bezierCurveTo(-.13,.11,-.17,.32,-.08,.41); shape.quadraticCurveTo(0,.37,.08,.41); shape.bezierCurveTo(.17,.32,.13,.11,0,0);
   const petalGeometry = new THREE.ShapeGeometry(shape,3); const pp = petalGeometry.attributes.position;
   for (let i = 0; i < pp.count; i++) pp.setZ(i,Math.pow(pp.getY(i),2) * .65); petalGeometry.computeVertexNormals();
@@ -17,11 +17,7 @@ export function createYellowFlowers(scene: THREE.Scene,reducedMotion: boolean) {
   const dummy = new THREE.Object3D(),orientation = new THREE.Object3D(),base = new THREE.Vector3(),color = new THREE.Color();
   const flowers: {x:number;z:number;y:number;h:number;s:number;tilt:number;phase:number}[] = [];
   for (let i = 0; i < count; i++) {
-    // Fewer blossoms near the tree; distant terrain remains completely unplanted.
-    const near=i<1200;
-    const inner=near ? 3.5 : 19,outer=near ? 19 : 40;
-    const angle=rand(i+21) * Math.PI * 2,r=Math.sqrt(inner*inner+rand(i+82)*(outer*outer-inner*inner));
-    const x=Math.cos(angle)*r,z=Math.sin(angle)*r;
+    const {x,z}=layout.positions[i],r=Math.hypot(x,z);
     const patch=.9 + .1*Math.sin(x*.23+Math.cos(z*.18));
     const taper=1-THREE.MathUtils.smoothstep(r,24,42)*.75;
     flowers.push({x,z,y:terrainHeight(x,z),h:(1.05 + rand(i + 13) * .85)*patch*taper,s:(.55 + rand(i + 74) * .6)*taper,tilt:(rand(i + 99) - .5) * .5,phase:rand(i + 41) * Math.PI * 2});
@@ -60,5 +56,5 @@ export function createYellowFlowers(scene: THREE.Scene,reducedMotion: boolean) {
     };
     material.customProgramCacheKey=() => 'sparse-wildflower-wind-v1';
   }
-  return {update(time:number){wind.value=reducedMotion ? 0 : time;}};
+  return {lightTargets:layout.patches,update(time:number){wind.value=reducedMotion ? 0 : time;}};
 }
