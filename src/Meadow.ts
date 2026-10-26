@@ -23,7 +23,7 @@ function soilTexture() {
   return texture;
 }
 
-/** Green meadow with irregular dry soil patches and dense, uneven wild grass. */
+/** Green near the tree, fading into bare earth beyond the planted area. */
 export function createMeadow(scene:THREE.Scene,reducedMotion:boolean) {
   const groundGeometry=new THREE.PlaneGeometry(360,360,180,180); groundGeometry.rotateX(-Math.PI / 2);
   const p=groundGeometry.attributes.position,groundColors=new Float32Array(p.count * 3),color=new THREE.Color();
@@ -35,6 +35,7 @@ export function createMeadow(scene:THREE.Scene,reducedMotion:boolean) {
     const roots=Math.exp(-(x*x+z*z)/15)*.9;
     const path=Math.exp(-(((x+2.4*Math.sin(z*.1))/1.2)**2))*Math.exp(-(x*x+z*z)/1500)*.3;
     color.copy(green).lerp(earth,Math.min(1,.05+dry+roots+path));
+    color.lerp(earth,THREE.MathUtils.smoothstep(Math.hypot(x,z),24,44));
     color.multiplyScalar(.92+.12*(Math.sin(x*.41+z*.27)*.5+.5)); color.toArray(groundColors,i * 3);
   }
   groundGeometry.setAttribute('color',new THREE.BufferAttribute(groundColors,3)); groundGeometry.computeVertexNormals();
@@ -71,14 +72,9 @@ export function createMeadow(scene:THREE.Scene,reducedMotion:boolean) {
   material.customProgramCacheKey=() => 'short-earth-grass-v1';
   const dummy=new THREE.Object3D(),patches:THREE.InstancedMesh[]=[];
   const tiles:{px:number;pz:number;size:number;near:boolean;count:number}[]=[];
-  for (let px=-3;px<=3;px++) for (let pz=-3;pz<=3;pz++) {
+  for (let px=-2;px<=2;px++) for (let pz=-2;pz<=2;pz++) {
     const near=Math.abs(px)<=1 && Math.abs(pz)<=1;
     tiles.push({px,pz,size:24,near,count:near ? 12000 : 4000});
-  }
-  // Larger, simpler outer tiles continue the meadow without a visible bare ring.
-  for (let px=-2;px<=2;px++) for (let pz=-2;pz<=2;pz++) {
-    if (Math.abs(px)<=1 && Math.abs(pz)<=1) continue;
-    tiles.push({px,pz,size:56,near:false,count:5000});
   }
   for (const {px,pz,size,near,count} of tiles) {
     const mesh=new THREE.InstancedMesh(near ? nearGeometry : farGeometry,material,count);
@@ -87,12 +83,15 @@ export function createMeadow(scene:THREE.Scene,reducedMotion:boolean) {
       const x=px * size + (random(seed+i)-.5) * size,z=pz * size + (random(seed+i+400)-.5) * size;
       const radius=Math.hypot(x,z),patch=Math.sin(x * .55 + Math.sin(z * .31) * 2) + Math.cos(z * .48 - x * .15);
       const path=Math.abs(x + 2.4 * Math.sin(z * .1));
+      const coverage=1-THREE.MathUtils.smoothstep(radius,24,42);
+      if (random(seed+i+2300)>=coverage) continue;
       if (radius<2.5 || patch < -1.45 || (radius<24 && path<1.1 && random(seed+i+1700)<.65)) continue;
       dummy.position.set(x,terrainHeight(x,z),z); dummy.rotation.set(0,random(seed+i+800) * Math.PI * 2,0);
       dummy.scale.set((near ? 1 : 1.8) + random(i+5) * .9,1.2 + random(seed+i+1200) * 1.9,1); dummy.updateMatrix(); mesh.setMatrixAt(written,dummy.matrix);
       mesh.setColorAt(written++,color.setHSL(.205 + random(i+seed+3) * .06,.3 + random(i+7) * .16,.34 + random(i+11) * .14));
     }
-    mesh.count=written; mesh.name= size===56 ? 'Distant wild grass' : 'Wild grass clumps'; mesh.computeBoundingSphere(); scene.add(mesh); patches.push(mesh);
+    if (!written) { mesh.dispose(); continue; }
+    mesh.count=written; mesh.name='Wild grass clumps'; mesh.computeBoundingSphere(); scene.add(mesh); patches.push(mesh);
   }
   return {update(elapsed:number){time.value=reducedMotion ? 0 : elapsed;},patches};
 }
