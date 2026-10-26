@@ -17,7 +17,7 @@ npm.cmd install
 npm.cmd run dev -- --port 3000 --strictPort
 ```
 
-Mở http://localhost:3000, bấm nút Quét QR gửi lời chúc. Điện thoại và máy tính dùng cùng Wi-Fi; QR tự dùng địa chỉ LAN của máy. Để review animation:
+Mở http://localhost:3000, quét QR màu xanh trong khung lời chúc. Khi chưa có lời được duyệt, khung hiện QR lớn và hướng dẫn gửi; khi có lời đầu tiên, danh sách hiện dần và QR thu xuống chân khung. Điện thoại và máy tính dùng cùng Wi-Fi; QR tự dùng địa chỉ LAN của máy nếu chưa đặt URL chính thức. Để review animation:
 
 1. Mở http://localhost:3000 ở tab thứ nhất.
 2. Quét QR bằng điện thoại cùng Wi-Fi hoặc mở http://localhost:3000/join ở tab khác.

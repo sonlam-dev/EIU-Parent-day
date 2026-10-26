@@ -14,6 +14,8 @@ import EnvelopeWish from './EnvelopeWish';
 import { createMorningSky } from './MorningSky';
 import { daylightBalance } from './Daylight';
 import eiuLogo from './assets/eiu-logo.png';
+import {Sprout} from 'lucide-react';
+import {waitForSceneTextures} from './SceneAssets';
 
 export type ViewSettings = {zoom:number;autoRotate:boolean;speed:number;reset:number};
 type Props = { wishes: Wish[]; ready: boolean; arrival: Arrival | null; view:ViewSettings };
@@ -22,12 +24,14 @@ export default function Tree(props: Props) {
   const host = useRef<HTMLDivElement>(null); const state = useRef(props); state.current = props;
   const sync = useRef(() => {}); const launch = useRef(() => {}); const [failed,setFailed] = useState(false);
   const applyView = useRef(() => {});
+  const [sceneReady,setSceneReady]=useState(false);
   const [selectedId,setSelectedId]=useState<string | null>(null);
   const reading=useRef(false); reading.current=selectedId!==null;
   useEffect(() => { sync.current(); },[props.wishes,props.ready]);
   useEffect(() => { launch.current(); },[props.arrival]);
   useEffect(() => { applyView.current(); },[props.view]);
   useEffect(() => {
+    setSceneReady(false);
     const el = host.current!; let renderer: THREE.WebGLRenderer;
     try { renderer = new THREE.WebGLRenderer({antialias:true,powerPreference:'high-performance'}); }
     catch { setFailed(true); return; }
@@ -113,9 +117,20 @@ export default function Tree(props: Props) {
       resolutionCeiling=renderPixelRatio(width,height,devicePixelRatio); resolution=resolutionCeiling;
       renderer.setPixelRatio(resolution); camera.updateProjectionMatrix(); renderer.setSize(width,height);
     }); resize.observe(el);
+    let disposed=false,prepared=false,warmupFrames=0;
+    let compileTimer:ReturnType<typeof setTimeout>|undefined;
+    const assets=waitForSceneTextures(scene);
+    void assets.ready.then(async()=>{
+      if(disposed)return;
+      try {
+        await Promise.race([renderer.compileAsync(scene,camera),new Promise<void>(resolve=>{compileTimer=setTimeout(resolve,3500);})]);
+      } catch { /* The hidden warm-up frames also compile on renderers without async support. */ }
+      clearTimeout(compileTimer);
+      if(!disposed)prepared=true;
+    });
     const clock = new THREE.Clock(); let frame = 0,sampleTime=0,sampleFrames=0;
     function render() {
-      frame = requestAnimationFrame(render); const elapsed=clock.getDelta(); if (document.hidden) return; const dt=Math.min(elapsed,.12); now += dt;
+      frame = requestAnimationFrame(render); const elapsed=clock.getDelta(); if (document.hidden || !prepared) return; const dt=Math.min(elapsed,.12); now += dt;
       controls.autoRotate = state.current.view.autoRotate && !motion.matches && !reading.current; controls.autoRotateSpeed = state.current.view.speed * .8; controls.update(dt);
       morning.update(now,camera); meadow.update(now); flowers.update(now); decor.update(now); oak.update(motion.matches ? 0 : now);
       // Place the mark beyond the tree so foliage naturally occludes it, above the sky layer.
@@ -133,6 +148,7 @@ export default function Tree(props: Props) {
       renderer.toneMappingExposure=THREE.MathUtils.damp(renderer.toneMappingExposure,balance.exposure,3,dt);
       if(shadowSun.dot(sunDirection)<.9996) { shadowSun.copy(sunDirection); renderer.shadowMap.needsUpdate=true; }
       renderer.render(scene,camera);
+      if(++warmupFrames===3)setSceneReady(true);
       if (elapsed > 0 && elapsed < .5) { sampleTime+=elapsed; sampleFrames++; }
       if (sampleTime >= 2) {
         const fps=sampleFrames / sampleTime;
@@ -145,6 +161,7 @@ export default function Tree(props: Props) {
       }
     } render();
     return () => {
+      disposed=true;assets.cancel();clearTimeout(compileTimer);
       cancelAnimationFrame(frame); resize.disconnect(); controls.dispose();
       canvas.removeEventListener('pointerdown',pointerDown); canvas.removeEventListener('pointerup',pointerUp);
       canvas.removeEventListener('pointermove',pointerMove); canvas.removeEventListener('pointercancel',cancelPress);
@@ -155,6 +172,6 @@ export default function Tree(props: Props) {
     };
   },[]);
   const selectedWish=props.wishes.find(wish => wish.id===selectedId && wish.status==='approved');
-  return <><div ref={host} className="event-world">{failed && <div className="screen-loading"><span>🌳</span><p>Không khởi tạo được WebGL. Hãy mở màn hình chiếu bằng trình duyệt hỗ trợ tăng tốc đồ họa.</p></div>}</div>{selectedId && <EnvelopeWish key={selectedId} wish={selectedWish} onClose={() => setSelectedId(null)}/>}</>;
+  return <><div className="event-world" data-scene-ready={sceneReady}><div ref={host} className="scene-canvas"/>{failed ? <div className="screen-loading"><span>🌳</span><p>Không khởi tạo được WebGL. Hãy mở màn hình chiếu bằng trình duyệt hỗ trợ tăng tốc đồ họa.</p></div> : <div className="scene-loading-veil" aria-hidden={sceneReady}><div className="scene-loading-caption" role="status"><span className="scene-loading-mark"><Sprout size={32}/></span><p>Đang mở khu vườn yêu thương…</p></div></div>}</div>{selectedId && <EnvelopeWish key={selectedId} wish={selectedWish} onClose={() => setSelectedId(null)}/>}</>;
 }
 

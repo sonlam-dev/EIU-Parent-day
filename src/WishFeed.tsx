@@ -1,14 +1,29 @@
-import {useLayoutEffect,useRef,useState} from 'react';
-import {Mail,Wifi,WifiOff} from 'lucide-react';
+import {useEffect,useLayoutEffect,useRef,useState} from 'react';
+import {Mail,QrCode,Wifi,WifiOff} from 'lucide-react';
+import QRCode from 'qrcode';
 import type {Wish} from './types';
 import {colors} from './types';
 import EnvelopeWish from './EnvelopeWish';
 
-type Props={wishes:Wish[];loading:boolean;connection:'connecting'|'live'|'retrying'|'demo';error:string;total:number};
-export default function WishFeed({wishes,loading,connection,error,total}:Props) {
+type Props={wishes:Wish[];loading:boolean;connection:'connecting'|'live'|'retrying'|'demo';error:string;total:number;shareUrl:string};
+export default function WishFeed({wishes,loading,connection,error,total,shareUrl}:Props) {
   const [track,setTrack]=useState({rows:wishes,scrolling:false});
   const previous=useRef(wishes);
   const [selected,setSelected]=useState<Wish|null>(null);
+  const [qr,setQr]=useState(''),[qrError,setQrError]=useState(false);
+  const viewport=useRef<HTMLDivElement>(null);
+  const hasWishes=wishes.length>0;
+  useEffect(()=>{
+    let active=true;setQrError(false);
+    void QRCode.toDataURL(shareUrl,{width:1000,margin:4,errorCorrectionLevel:'M',color:{dark:'#176b4b',light:'#ffffff'}})
+      .then(value=>{if(active)setQr(value);}).catch(()=>{if(active)setQrError(true);});
+    return ()=>{active=false;};
+  },[shareUrl]);
+  useLayoutEffect(()=>{
+    const node=viewport.current;if(!node)return;
+    const resize=new ResizeObserver(()=>node.style.setProperty('--wish-row-height',`${node.clientHeight/5}px`));
+    resize.observe(node);return ()=>resize.disconnect();
+  },[]);
   const signature=JSON.stringify(wishes);
   useLayoutEffect(()=>{
     const old=previous.current; previous.current=wishes;
@@ -20,9 +35,17 @@ export default function WishFeed({wishes,loading,connection,error,total}:Props) 
   },[signature]);
   const labels={connecting:'Đang kết nối',live:'Đang nhận lời chúc',retrying:'Đang kết nối lại',demo:'Bản trải nghiệm'};
   return <>
-    <section className="wish-feed" aria-label="Năm lời chúc mới nhất">
+    <section className="wish-feed" data-has-wishes={hasWishes} aria-label="Lời chúc và mã QR tham gia">
       <header className="wish-feed-header"><span className="wish-feed-icon"><Mail size={20}/></span><div><span>EIU PARENT DAY</span><h1>Những lời yêu thương</h1></div><span className="wish-feed-total">{total.toLocaleString('vi')}<small>lá thư</small></span></header>
-      <div className="wish-feed-viewport">
+      <div className="wish-feed-content">
+        <div className="wish-invitation" aria-hidden={hasWishes}>
+          <span className="wish-invitation-kicker"><QrCode size={18}/> QUÉT MÃ QR ĐỂ THAM GIA</span>
+          <h2>Mời phụ huynh<br/>gửi lời chúc!</h2>
+          <div className="wish-qr-large">{qr ? <img src={qr} width="1000" height="1000" alt="Mã QR xanh để gửi lời chúc"/> : <span role="status">{qrError ? 'Chưa tải được mã QR. Vui lòng tải lại trang.' : 'Đang chuẩn bị mã QR…'}</span>}</div>
+          <p>Mở camera điện thoại, quét mã<br/>và gửi lời chúc đến con.</p>
+          <small>{loading ? 'Đang đón những lời yêu thương…' : 'Lời chúc sẽ xuất hiện sau khi được duyệt.'}</small>
+        </div>
+      <div ref={viewport} className="wish-feed-viewport" aria-hidden={!hasWishes}>
         <div className={`wish-feed-track ${track.scrolling ? 'wish-feed-scrolling' : ''}`}>
           {track.rows.map(wish=><article className="wish-feed-row" key={wish.id}>
             <button className="wish-feed-card" onClick={()=>setSelected(wish)} aria-label={`Đọc lời chúc của ${wish.name} gửi ${wish.recipient}`}>
@@ -31,7 +54,11 @@ export default function WishFeed({wishes,loading,connection,error,total}:Props) 
             </button>
           </article>)}
         </div>
-        {!wishes.length && <p className="wish-feed-empty">{loading ? 'Đang đón những lời yêu thương…' : 'Gửi lời chúc đầu tiên để cùng vun đắp cây yêu thương.'}</p>}
+      </div>
+      </div>
+      <div className="wish-qr-footer" aria-hidden={!hasWishes}>
+        {qr && <img src={qr} width="1000" height="1000" alt="Quét mã QR để gửi thêm lời chúc"/>}
+        <div><strong>Mời phụ huynh gửi lời chúc!</strong><p>Mở camera điện thoại và quét mã để gửi lời chúc đến con.</p></div>
       </div>
       <footer className="wish-feed-status" data-connection={error ? 'retrying' : connection} role="status">{error || connection==='retrying' ? <WifiOff size={13}/> : <Wifi size={13}/>}<span>{error ? 'Đang kết nối lại · giữ các lời chúc đã nhận' : labels[connection]}</span></footer>
     </section>

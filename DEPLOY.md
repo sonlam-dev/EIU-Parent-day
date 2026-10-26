@@ -10,6 +10,7 @@
 - Nhiều lời đến cùng lúc được xếp hàng theo thời gian, mỗi lượt cách nhau 3,6 giây; không bỏ lời chúc. Cuộn kéo dài 0,6 giây. Bấm thẻ hoặc lá thư để đọc đầy đủ.
 - Sửa/ẩn lời chúc cập nhật nội dung hoặc gỡ khỏi khung và cây. Realtime có tải lại dự phòng mỗi 15 giây và khi quay lại tab.
 - Demo không đồng bộ qua Internet. Muốn nhiều điện thoại cùng dùng trên Vercel phải cấu hình Supabase.
+- QR màu xanh nằm trong khung lời chúc, không có nút QR riêng phía trên. Khi chưa có lời được duyệt, khung hiện QR lớn và hướng dẫn quét. Lời đầu tiên được duyệt kích hoạt chuyển cảnh sang danh sách; QR tiếp tục hiện ở chân khung. Cây và đồng cỏ chờ texture/shader sẵn sàng rồi hiện dần khi mở trang.
 
 ## 1. Tạo database Supabase và chạy SQL
 
@@ -32,6 +33,28 @@ on conflict (user_id) do nothing;
 ```
 
 Đây là UUID user Auth, không phải Project ID. Chỉ user có trong `admins` mới được duyệt. Nếu chỉ ban tổ chức đăng nhập, tắt cho phép người ngoài tự đăng ký trong cấu hình Auth. Khách gửi lời chúc không cần tài khoản.
+
+Cách cấp quyền theo email: mở `supabase/create-admin.sql`, thay `THAY_EMAIL_ADMIN_CUA_BAN` bằng email user đã tạo rồi chạy trong SQL Editor. Không đặt email/mật khẩu quản trị trong `.env.local`. Truy cập `https://eiu-parent-day-tree.vercel.app/admin` hoặc bấm nút **Quản trị** nhỏ ở góc trên trái trang chính, đăng nhập, chọn **Chờ duyệt → Duyệt**. Nút chứa QR dành cho ban tổ chức dẫn tới `/admin`; QR gửi lời chúc dành cho phụ huynh vẫn nằm trong khung lời chúc. Danh sách quản trị tự cập nhật qua Realtime; có nút Tải lại dự phòng.
+
+### Công cụ Emergency và xóa toàn bộ
+
+Sau migration 001, chạy **toàn bộ** `supabase/migrations/003_admin_operations.sql` trong SQL Editor rồi deploy bản ứng dụng mới lên Vercel. File 003 có thể chạy lại: chỉ cài chức năng và lưu 120 mẫu, không tự tạo hoặc xóa lời chúc.
+
+Nếu đã cài bản 003 cũ và nút xóa báo lỗi, chạy `supabase/migrations/004_fix_admin_delete.sql`. File này chỉ cập nhật hàm xóa để có điều kiện `WHERE id IS NOT NULL`, tương thích với cơ chế safeupdate của Supabase; không tự xóa dữ liệu khi chạy migration. Sau đó thử lại từ `/admin`. Bản frontend mới hiển thị mã lỗi cụ thể thay cho thông báo chung; cần deploy lại frontend để nhận cách báo lỗi mới.
+
+- **Emergency**: mỗi lần bấm thêm ngẫu nhiên 30–40 lời vào `wishes`, trạng thái `approved`, nguồn `emergency`. Màn hình nhận qua Realtime, mỗi lời tương ứng một lá thư. Có thể bấm lại sau khi lượt trước hoàn tất. Bộ mẫu dùng lần lượt, không lặp trước khi hết 120 lời rồi quay vòng; mỗi bản ghi luôn có UUID mới.
+- Lời mẫu đứng tên **EIU Parent Day**, được gắn nhãn **Lời mẫu Emergency** trong quản trị. Đây là nội dung dự phòng do ban tổ chức tạo, không gán tên khách tham dự. Bộ nội dung gốc nằm trong `supabase/emergency-messages.json`.
+- Bộ 120 mẫu hiện là lời **ba mẹ gửi cho con**, người nhận **Con yêu**, xoay quanh học tập, sự cố gắng, sức khỏe, ước mơ, gia đình và sự tử tế. Nếu đã cài bộ mẫu cũ, chạy `supabase/migrations/005_parent_to_child_samples.sql` để cập nhật. Migration chỉ thay thư viện mẫu cho các lượt Emergency tiếp theo; không sửa lời đã đăng hoặc đặt lại vị trí quay vòng.
+- **Xóa tất cả**: xóa vĩnh viễn toàn bộ lời chúc ở mọi trạng thái, gồm cả lời mẫu, và gỡ thư khỏi cây. Không xóa tài khoản Auth hoặc quyền admin. Nhập `XOA TAT CA` và bấm xác nhận. Không thể hoàn tác trong ứng dụng.
+- Mỗi thao tác có mã yêu cầu riêng để thử lại sau lỗi mạng mà không thêm hai đợt hoặc xóa nhầm đợt mới. Quyền được kiểm tra trong hàm SQL; tài khoản đăng nhập không có trong `admins` không thể thực hiện.
+- Nếu sửa bộ 120 mẫu: chạy `node scripts/build-admin-migration.mjs`, rồi chạy lại file SQL 003 đã tạo trên Supabase. Không giảm hoặc tăng số mẫu ngoài 120.
+
+Kiểm thử SQL trên database tạm (không kết nối Supabase thật):
+
+```powershell
+npm.cmd install --prefix artifacts/sql-qa --no-save --no-package-lock @electric-sql/pglite
+node scripts/test-admin-sql.mjs
+```
 
 Luồng mặc định có kiểm duyệt: lời mới chưa hiện cho đến khi bấm **Duyệt** ở `/admin`. Muốn hiển thị ngay không duyệt cần thay đổi quy tắc nhận lời chúc; không tắt RLS để đạt việc đó.
 

@@ -52,19 +52,19 @@ export function createLeafMaterial(texture:THREE.Texture,time={value:0}) {
       #include <begin_vertex>
       vec3 leafOrigin=instanceMatrix[3].xyz;
       float phase=leafOrigin.x * .37 + leafOrigin.z * .29;
-      float flutter=sin(uTime * 2.8 + phase) + .35 * sin(uTime * 4.1 - phase * 1.7);
-      transformed.z += flutter * .14 * uv.y * uv.y;
-      transformed.x += sin(uTime * 1.9 + phase * .7) * .065 * uv.y;
+      float flutter=sin(uTime * 1.5 + phase) + .25 * sin(uTime * 2.2 - phase * 1.7);
+      transformed.z += flutter * .055 * uv.y * uv.y;
+      transformed.x += sin(uTime * 1.1 + phase * .7) * .025 * uv.y;
     `).replace('#include <project_vertex>',`
       vec4 leafWorld=modelMatrix * instanceMatrix * vec4(transformed,1.0);
       float flex=smoothstep(.8,9.0,leafWorld.y);
-      leafWorld.x += sin(uTime * 1.3 + leafWorld.z * .22) * .19 * flex;
-      leafWorld.z += sin(uTime * .95 + leafWorld.x * .2) * .11 * flex;
+      leafWorld.x += sin(uTime * .75 + leafWorld.z * .22) * .075 * flex;
+      leafWorld.z += sin(uTime * .55 + leafWorld.x * .2) * .045 * flex;
       vec4 mvPosition=viewMatrix * leafWorld;
       gl_Position=projectionMatrix * mvPosition;
     `);
   };
-  material.customProgramCacheKey=() => 'small-leaf-gusts-v2';
+  material.customProgramCacheKey=() => 'small-leaf-gentle-breeze-v3';
   return material;
 }
 
