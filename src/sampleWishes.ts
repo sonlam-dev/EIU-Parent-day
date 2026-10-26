@@ -1,12 +1,11 @@
-﻿import type { Wish } from './types';
+import type { Wish } from './types';
 export const sampleWishes: Wish[] = [
-  ['EIU Parent Day', 'Con yêu', 'Ba mẹ tự hào về những cố gắng mỗi ngày của con.', 'green'],
-  ['EIU Parent Day', 'Con yêu', 'Con cứ theo đuổi ước mơ, ba mẹ luôn ở bên.', 'pink'],
-  ['EIU Parent Day', 'Con yêu', 'Ba mẹ chúc con học vui và có những người bạn tốt.', 'gold'],
-  ['EIU Parent Day', 'Con yêu', 'Nhớ ăn đủ bữa và ngủ ngon nhé, ba mẹ thương con.', 'sage'],
-  ['EIU Parent Day', 'Con yêu', 'Ba mẹ tin con sẽ tìm được con đường của mình.', 'green'],
-  ['EIU Parent Day', 'Con yêu', 'Dù kết quả thế nào, ba mẹ vẫn luôn yêu con.', 'pink'],
-  ['EIU Parent Day', 'Con yêu', 'Mệt thì nghỉ một chút, ba mẹ luôn đợi con về.', 'sage'],
-  ['EIU Parent Day', 'Con yêu', 'Ba mẹ chúc con tự tin và vui với mỗi điều mới.', 'gold'],
+  ['Ba Hùng', 'Con yêu', 'Ba luôn tự hào và đồng hành cùng ước mơ của con.', 'green'],
+  ['Mẹ Lan', 'Con yêu', 'Mẹ chúc con học tốt và có nhiều niềm vui tại EIU.', 'pink'],
+  ['Ba Tuấn', 'Con yêu', 'Ba tin con luôn vững vàng trên con đường đại học đã chọn.', 'gold'],
+  ['Mẹ Mai', 'Con yêu', 'Mẹ mong con luôn khỏe mạnh, tự tin và ăn ngủ đúng giờ.', 'sage'],
+  ['Ba Dũng', 'Con yêu', 'Ba chúc con có những năm tháng sinh viên thật rực rỡ.', 'green'],
+  ['Mẹ Thảo', 'Con yêu', 'Mẹ luôn là điểm tựa bình yên và ấm áp nhất của con.', 'pink'],
+  ['Ba Nam', 'Con yêu', 'Ba tin con sẽ làm chủ tri thức và tương lai của mình.', 'sage'],
+  ['Mẹ Hoa', 'Con yêu', 'Mẹ tự hào khi thấy con trưởng thành và tự lập mỗi ngày.', 'gold'],
 ].map(([name, recipient, message, color], i) => ({ id: `demo-${i}`, name, recipient, message, color, status: 'approved', created_at: new Date(Date.now() - i * 120000).toISOString() }));
-

@@ -1,122 +1,482 @@
 [
-  ["Con yêu", "Ba mẹ tin con sẽ tìm thấy niềm vui trên hành trình học tập."],
-  ["Con yêu", "Mỗi điều con học được đều là một bước tiến khiến ba mẹ vui."],
-  ["Con yêu", "Ba mẹ mong con học bằng sự tò mò và lòng yêu thích."],
-  ["Con yêu", "Điểm số không nói hết giá trị của con trong lòng ba mẹ."],
-  ["Con yêu", "Ba mẹ tự hào khi thấy con kiên nhẫn với một bài học khó."],
-  ["Con yêu", "Con cứ mạnh dạn hỏi, ba mẹ luôn trân trọng tinh thần ham học."],
-  ["Con yêu", "Ba mẹ chúc con tìm được những người thầy truyền cảm hứng."],
-  ["Con yêu", "Mong con giữ đôi mắt tò mò với thế giới, ba mẹ luôn ủng hộ."],
-  ["Con yêu", "Ba mẹ vui vì con đang học cách tự giải quyết vấn đề."],
-  ["Con yêu", "Mỗi lần con hiểu thêm một điều mới, ba mẹ cũng thấy hạnh phúc."],
-  ["Con yêu", "Ba mẹ mong con học để hiểu mình và giúp ích cho mọi người."],
-  ["Con yêu", "Con không cần biết hết mọi thứ, ba mẹ chỉ mong con chịu học."],
-  ["Con yêu", "Ba mẹ tin những ngày chăm chỉ hôm nay sẽ giúp con vững vàng."],
-  ["Con yêu", "Mong con tìm được cách học phù hợp với mình, ba mẹ luôn lắng nghe."],
-  ["Con yêu", "Ba mẹ tự hào khi con biết nhận lỗi và học từ điều chưa đúng."],
-  ["Con yêu", "Con hãy học từng chút một, ba mẹ tin vào sự bền bỉ của con."],
-  ["Con yêu", "Ba mẹ chúc con có những giờ học nhiều khám phá và tiếng cười."],
-  ["Con yêu", "Mong con tìm thấy điều mình yêu thích giữa những bài học, ba mẹ tin con."],
-  ["Con yêu", "Ba mẹ vui khi thấy con biết dành thời gian cho việc học của mình."],
-  ["Con yêu", "Con cứ tiếp tục khám phá, ba mẹ sẽ cùng con học những điều mới."],
-  ["Con yêu", "Ba mẹ nhìn thấy những cố gắng thầm lặng của con mỗi ngày."],
-  ["Con yêu", "Dù kết quả ra sao, ba mẹ vẫn tự hào về sự nỗ lực của con."],
-  ["Con yêu", "Con đã đi xa hơn mình nghĩ, ba mẹ mong con biết ghi nhận bản thân."],
-  ["Con yêu", "Ba mẹ tin một bước nhỏ hôm nay cũng đáng được trân trọng."],
-  ["Con yêu", "Khi con muốn thử lại, ba mẹ luôn sẵn lòng cổ vũ."],
-  ["Con yêu", "Ba mẹ tự hào vì con đã không bỏ cuộc trước điều khó."],
-  ["Con yêu", "Con có thể đi chậm, ba mẹ vẫn vui khi thấy con tiến bước."],
-  ["Con yêu", "Ba mẹ biết có những ngày con đã cố gắng rất nhiều."],
-  ["Con yêu", "Mong con tự hào về từng tiến bộ nhỏ như ba mẹ tự hào về con."],
-  ["Con yêu", "Con không cần giỏi hơn ai, ba mẹ mong con lớn lên theo cách của mình."],
-  ["Con yêu", "Ba mẹ tin sự chăm chỉ của con đang âm thầm tạo nên thay đổi."],
-  ["Con yêu", "Những lần con đứng dậy sau vấp ngã đều khiến ba mẹ cảm phục."],
-  ["Con yêu", "Ba mẹ thương cả những ngày con chưa làm được điều mình mong muốn."],
-  ["Con yêu", "Con cứ kiên trì với điều có ý nghĩa, ba mẹ sẽ đồng hành."],
-  ["Con yêu", "Ba mẹ mong con nhìn lại để thấy mình đã trưởng thành thế nào."],
-  ["Con yêu", "Mỗi lần con dám bắt đầu là một lần ba mẹ thấy con can đảm."],
-  ["Con yêu", "Ba mẹ tin con sẽ học được nhiều điều từ cả thành công lẫn thất bại."],
-  ["Con yêu", "Con đừng quên khen mình sau một ngày cố gắng, ba mẹ cũng vậy."],
-  ["Con yêu", "Ba mẹ trân trọng sự nghiêm túc con dành cho điều mình lựa chọn."],
-  ["Con yêu", "Con đã làm tốt trong khả năng hôm nay, ba mẹ ghi nhận điều đó."],
-  ["Con yêu", "Ba mẹ mong con khỏe mạnh, ăn đủ bữa và ngủ thật ngon."],
-  ["Con yêu", "Khi mệt, con hãy nghỉ một chút, ba mẹ không mong con quá sức."],
-  ["Con yêu", "Ba mẹ mong con bình an hơn là phải luôn dẫn đầu."],
-  ["Con yêu", "Con không cần hoàn hảo để được ba mẹ yêu thương."],
-  ["Con yêu", "Ba mẹ luôn sẵn lòng nghe con kể về một ngày không vui."],
-  ["Con yêu", "Mong con biết chăm sóc mình như cách ba mẹ luôn thương con."],
-  ["Con yêu", "Ba mẹ chúc con có những ngày nhẹ lòng và nhiều tiếng cười."],
-  ["Con yêu", "Con có quyền nói mình đang buồn, ba mẹ sẽ lắng nghe."],
-  ["Con yêu", "Ba mẹ mong con dành thời gian cho những điều khiến mình thấy dễ chịu."],
-  ["Con yêu", "Dù hôm nay con thấy thế nào, ba mẹ vẫn luôn yêu con."],
-  ["Con yêu", "Ba mẹ chúc con đủ bình tĩnh để bước qua những ngày nhiều lo lắng."],
-  ["Con yêu", "Con hãy nhớ uống nước và giữ sức khỏe, ba mẹ luôn quan tâm."],
-  ["Con yêu", "Ba mẹ mong con giữ cho mình những khoảng nghỉ thật bình yên."],
-  ["Con yêu", "Con không phải giấu mọi khó khăn, ba mẹ luôn ở đây để nghe."],
-  ["Con yêu", "Ba mẹ vui khi con biết chọn điều phù hợp với sức mình."],
-  ["Con yêu", "Mong con biết dịu dàng với bản thân, ba mẹ thương con rất nhiều."],
-  ["Con yêu", "Ba mẹ chúc con một sớm mai nhiều năng lượng và một tối ngủ yên."],
-  ["Con yêu", "Con có thể nhờ giúp đỡ khi cần, ba mẹ sẽ cùng con tìm cách."],
-  ["Con yêu", "Ba mẹ mong con tìm được niềm vui trong những điều giản dị."],
-  ["Con yêu", "Sức khỏe và nụ cười của con luôn là điều ba mẹ quý nhất."],
-  ["Con yêu", "Ba mẹ tin con có quyền ước mơ và chọn con đường của mình."],
-  ["Con yêu", "Con cứ thử điều mình yêu thích, ba mẹ sẽ nghe con chia sẻ."],
-  ["Con yêu", "Ba mẹ chúc con đủ can đảm bước vào những trải nghiệm mới."],
-  ["Con yêu", "Mong con theo đuổi ước mơ bằng những bước nhỏ, ba mẹ tin con."],
-  ["Con yêu", "Ba mẹ không chọn thay con, nhưng luôn sẵn lòng cùng con suy nghĩ."],
-  ["Con yêu", "Con có thể đổi hướng khi hiểu mình hơn, ba mẹ sẽ lắng nghe."],
-  ["Con yêu", "Ba mẹ mong con tìm được công việc có ý nghĩa với mình."],
-  ["Con yêu", "Dù con chọn lối đi nào, ba mẹ mong con đi bằng sự tử tế."],
-  ["Con yêu", "Ba mẹ tin những sở thích nhỏ hôm nay có thể mở ra điều tốt đẹp."],
-  ["Con yêu", "Con đừng sợ bắt đầu từ điều nhỏ, ba mẹ luôn cổ vũ."],
-  ["Con yêu", "Ba mẹ chúc con gặp những cơ hội phù hợp và biết nắm lấy chúng."],
-  ["Con yêu", "Mong con dám nói về điều mình muốn, ba mẹ sẽ dành thời gian nghe."],
-  ["Con yêu", "Ba mẹ tự hào khi con biết suy nghĩ kỹ trước mỗi lựa chọn."],
-  ["Con yêu", "Con không cần có mọi câu trả lời hôm nay, ba mẹ hiểu điều đó."],
-  ["Con yêu", "Ba mẹ chúc con tìm được nhịp đi của riêng mình."],
-  ["Con yêu", "Mong con giữ sự tò mò khi bước ra thế giới, ba mẹ luôn bên con."],
-  ["Con yêu", "Ba mẹ tin con sẽ dần nhận ra điều thật sự quan trọng với mình."],
-  ["Con yêu", "Con cứ vững tâm trước chặng đường mới, ba mẹ sẽ là hậu phương."],
-  ["Con yêu", "Ba mẹ mong con được sống với điều mình yêu và tin tưởng."],
-  ["Con yêu", "Mỗi ước mơ con kể đều được ba mẹ lắng nghe bằng cả tấm lòng."],
-  ["Con yêu", "Nhà luôn sẵn một vòng tay của ba mẹ sau mọi hành trình của con."],
-  ["Con yêu", "Ba mẹ mong có thêm nhiều bữa cơm được nghe con kể chuyện."],
-  ["Con yêu", "Dù con đi xa đến đâu, tình thương của ba mẹ vẫn ở bên."],
-  ["Con yêu", "Ba mẹ cảm ơn con đã mang đến cho mái nhà nhiều tiếng cười."],
-  ["Con yêu", "Con lớn đến đâu vẫn luôn có một chỗ bình yên bên ba mẹ."],
-  ["Con yêu", "Ba mẹ mong gia đình mình luôn dành thời gian lắng nghe nhau."],
-  ["Con yêu", "Khi nhớ nhà, con cứ gọi, ba mẹ luôn muốn nghe giọng con."],
-  ["Con yêu", "Ba mẹ trân trọng từng khoảnh khắc được đồng hành cùng con."],
-  ["Con yêu", "Con không cần mang thành tích về nhà, ba mẹ mong được gặp con."],
-  ["Con yêu", "Ba mẹ mong con biết rằng mình luôn được chào đón trở về."],
-  ["Con yêu", "Cảm ơn con đã dạy ba mẹ thêm nhiều điều về yêu thương."],
-  ["Con yêu", "Ba mẹ mong được cùng con tạo thêm những kỷ niệm giản dị."],
-  ["Con yêu", "Dù lịch trình bận rộn, ba mẹ vẫn luôn dành một khoảng cho con."],
-  ["Con yêu", "Con cứ kể cả chuyện vui lẫn chuyện buồn, ba mẹ muốn hiểu con hơn."],
-  ["Con yêu", "Ba mẹ thương những thay đổi nhỏ của con trên đường trưởng thành."],
-  ["Con yêu", "Mong con luôn nhớ có ba mẹ ở phía sau mỗi bước đi."],
-  ["Con yêu", "Ba mẹ mong căn nhà này luôn là nơi con được là chính mình."],
-  ["Con yêu", "Con không cần mạnh mẽ mọi lúc khi ở cạnh ba mẹ."],
-  ["Con yêu", "Ba mẹ hạnh phúc khi thấy con tìm được những niềm vui riêng."],
-  ["Con yêu", "Mong mỗi lần trở về đều cho con thêm bình yên, ba mẹ luôn đợi."],
-  ["Con yêu", "Ba mẹ mong con sống tử tế và biết quan tâm đến người bên cạnh."],
-  ["Con yêu", "Con hãy giữ lời hứa từ những việc nhỏ, ba mẹ tin ở con."],
-  ["Con yêu", "Ba mẹ tự hào khi con biết cảm ơn và nói lời xin lỗi."],
-  ["Con yêu", "Mong con chọn sự chân thành trong những mối quan hệ, ba mẹ tin con."],
-  ["Con yêu", "Ba mẹ chúc con có những người bạn biết lắng nghe và tôn trọng nhau."],
-  ["Con yêu", "Con hãy giúp đỡ trong khả năng của mình, ba mẹ sẽ cùng con sẻ chia."],
-  ["Con yêu", "Ba mẹ mong con biết tôn trọng những điều khác biệt ở mỗi người."],
-  ["Con yêu", "Sự tử tế của con làm ba mẹ thấy ấm lòng."],
-  ["Con yêu", "Ba mẹ chúc con đủ tự tin để nói không với điều không phù hợp."],
-  ["Con yêu", "Mong con giữ lòng biết ơn mà vẫn biết bảo vệ mình, ba mẹ thương con."],
-  ["Con yêu", "Ba mẹ tự hào khi con dám nhận trách nhiệm về lựa chọn của mình."],
-  ["Con yêu", "Con hãy lắng nghe trước khi phán xét, đó là điều ba mẹ cùng con học."],
-  ["Con yêu", "Ba mẹ mong con xây dựng tình bạn bằng sự chân thành và tin cậy."],
-  ["Con yêu", "Mỗi việc tốt nhỏ con làm đều có ý nghĩa, ba mẹ tin điều đó."],
-  ["Con yêu", "Ba mẹ chúc con biết yêu thương mà không quên tôn trọng bản thân."],
-  ["Con yêu", "Mong con giữ sự khiêm tốn khi thành công, ba mẹ luôn nhắc mình như vậy."],
-  ["Con yêu", "Ba mẹ mong con biết vui cho hạnh phúc của những người quanh mình."],
-  ["Con yêu", "Con hãy sống thật với điều mình tin là đúng, ba mẹ sẽ lắng nghe."],
-  ["Con yêu", "Ba mẹ tự hào về trái tim biết quan tâm và sẻ chia của con."],
-  ["Con yêu", "Mong con lớn lên vững vàng và ấm áp, ba mẹ luôn yêu con."]
+  [
+    "Con yêu",
+    "Ba tin con luôn vững vàng trên con đường đại học đã chọn."
+  ],
+  [
+    "Con yêu",
+    "Mẹ chúc con học tốt và có nhiều niềm vui tại EIU."
+  ],
+  [
+    "Con yêu",
+    "Ba luôn tự hào và đồng hành cùng ước mơ của con."
+  ],
+  [
+    "Con yêu",
+    "Mẹ mong con luôn khỏe mạnh, tự tin và ăn ngủ đúng giờ."
+  ],
+  [
+    "Con yêu",
+    "Ba chúc con có những năm tháng sinh viên thật rực rỡ."
+  ],
+  [
+    "Con yêu",
+    "Mẹ luôn là điểm tựa bình yên và ấm áp nhất của con."
+  ],
+  [
+    "Con yêu",
+    "Ba tin con sẽ làm chủ tri thức và tương lai của mình."
+  ],
+  [
+    "Con yêu",
+    "Mẹ tự hào khi thấy con trưởng thành và biết lo toan."
+  ],
+  [
+    "Con yêu",
+    "Ba mong con luôn kiên trì, bản lĩnh trước mọi thử thách."
+  ],
+  [
+    "Con yêu",
+    "Mẹ chúc con tìm được niềm say mê trong từng môn học."
+  ],
+  [
+    "Con yêu",
+    "Ba chúc con luôn giữ vững đam mê với ngành học của mình."
+  ],
+  [
+    "Con yêu",
+    "Mẹ thương chúc con yêu luôn rạng rỡ và bình an."
+  ],
+  [
+    "Con yêu",
+    "Ba luôn ở phía sau tiếp thêm sức mạnh cho con."
+  ],
+  [
+    "Con yêu",
+    "Mẹ mong con nhớ giữ gìn sức khỏe, đừng thức quá khuya nhé."
+  ],
+  [
+    "Con yêu",
+    "Ba tin con sẽ tìm thấy con đường và lý tưởng của riêng mình."
+  ],
+  [
+    "Con yêu",
+    "Mẹ luôn tin con sẽ làm thật tốt mọi việc con yêu thích."
+  ],
+  [
+    "Con yêu",
+    "Ba chúc con học tập tốt và gặt hái nhiều trải nghiệm quý giá."
+  ],
+  [
+    "Con yêu",
+    "Mẹ chúc con có những tình bạn đẹp thời sinh viên."
+  ],
+  [
+    "Con yêu",
+    "Ba tự hào khi thấy con trưởng thành và tự lập mỗi ngày."
+  ],
+  [
+    "Con yêu",
+    "Mẹ tự hào về sự chăm chỉ và tấm lòng hiếu thảo của con."
+  ],
+  [
+    "Con yêu",
+    "Ba mong con dám nghĩ dám làm, không ngại bước ra biển lớn."
+  ],
+  [
+    "Con yêu",
+    "Mẹ mong mỗi ngày đến giảng đường đều mang lại niềm vui cho con."
+  ],
+  [
+    "Con yêu",
+    "Ba chúc con luôn tự tin, vững bước trong từng kỳ học."
+  ],
+  [
+    "Con yêu",
+    "Mẹ luôn mở rộng vòng tay đợi con về sau những ngày bận rộn."
+  ],
+  [
+    "Con yêu",
+    "Ba luôn tin tưởng vào sự lựa chọn và nỗ lực của con."
+  ],
+  [
+    "Con yêu",
+    "Mẹ chúc con thi cử suôn sẻ, làm bài thật tự tin."
+  ],
+  [
+    "Con yêu",
+    "Ba mong con rèn luyện cả tài năng lẫn đạo đức tại trường."
+  ],
+  [
+    "Con yêu",
+    "Mẹ mong con biết yêu thương bản thân và lắng nghe cơ thể."
+  ],
+  [
+    "Con yêu",
+    "Ba chúc con kết giao thêm nhiều người bạn cùng chí hướng."
+  ],
+  [
+    "Con yêu",
+    "Mẹ tin con sẽ tỏa sáng với năng lực và sự kiên trì của mình."
+  ],
+  [
+    "Con yêu",
+    "Ba thương chúc con đạt kết quả thật tốt trong mùa thi tới."
+  ],
+  [
+    "Con yêu",
+    "Mẹ chúc con học thêm nhiều điều hay từ thầy cô và bạn bè."
+  ],
+  [
+    "Con yêu",
+    "Ba mong con luôn giữ tinh thần ham học hỏi và sáng tạo."
+  ],
+  [
+    "Con yêu",
+    "Mẹ luôn cầu mong con được bình an và may mắn trên mọi nẻo đường."
+  ],
+  [
+    "Con yêu",
+    "Ba tin những đêm miệt mài ôn luyện sẽ đem lại quả ngọt."
+  ],
+  [
+    "Con yêu",
+    "Mẹ tự hào vì con luôn sống tình cảm và biết quan tâm mọi người."
+  ],
+  [
+    "Con yêu",
+    "Ba luôn là điểm tựa vững chãi mỗi khi con cần sẻ chia."
+  ],
+  [
+    "Con yêu",
+    "Mẹ chúc con luôn giữ được nét hồn nhiên và tinh thần lạc quan."
+  ],
+  [
+    "Con yêu",
+    "Ba mong con biết cân bằng giữa học tập và sức khỏe."
+  ],
+  [
+    "Con yêu",
+    "Mẹ mong con không đặt nặng áp lực, cứ cố gắng hết sức là được."
+  ],
+  [
+    "Con yêu",
+    "Ba chúc con có nhiều kỷ niệm đẹp dưới mái trường EIU."
+  ],
+  [
+    "Con yêu",
+    "Mẹ thương chúc con một kỳ học bổ ích và nhiều niềm vui."
+  ],
+  [
+    "Con yêu",
+    "Ba tự hào về sự kiên định và tinh thần trách nhiệm của con."
+  ],
+  [
+    "Con yêu",
+    "Mẹ luôn ở bên con, lắng nghe mọi vui buồn con kể."
+  ],
+  [
+    "Con yêu",
+    "Ba chúc con chinh phục thành công những mục tiêu đã đề ra."
+  ],
+  [
+    "Con yêu",
+    "Mẹ chúc con gặp nhiều thuận lợi trong công việc và học tập."
+  ],
+  [
+    "Con yêu",
+    "Ba mong con không sợ sai lầm, mỗi vấp ngã là một bài học."
+  ],
+  [
+    "Con yêu",
+    "Mẹ mong con luôn nhớ ăn cơm đầy đủ, đừng bỏ bữa nhé con."
+  ],
+  [
+    "Con yêu",
+    "Ba tin con sẽ trở thành một người tài giỏi và có ích."
+  ],
+  [
+    "Con yêu",
+    "Mẹ tự hào thấy con tự lập và vững vàng ở môi trường mới."
+  ],
+  [
+    "Con yêu",
+    "Ba chúc con hoàn thành xuất sắc đồ án và các môn học khó."
+  ],
+  [
+    "Con yêu",
+    "Mẹ chúc con luôn kiên nhẫn và bao dung với chính mình."
+  ],
+  [
+    "Con yêu",
+    "Ba mong con giữ vững nhiệt huyết tuổi trẻ và niềm tin."
+  ],
+  [
+    "Con yêu",
+    "Mẹ mong con tìm thấy hạnh phúc từ những điều giản dị quanh mình."
+  ],
+  [
+    "Con yêu",
+    "Ba luôn dõi theo từng bước tiến bộ của con trên giảng đường."
+  ],
+  [
+    "Con yêu",
+    "Mẹ tin con có đủ sức mạnh để vượt qua mọi khó khăn."
+  ],
+  [
+    "Con yêu",
+    "Ba chúc con luôn giữ cái đầu lạnh và trái tim ấm áp."
+  ],
+  [
+    "Con yêu",
+    "Mẹ chúc con bước vào kỳ thi mới với tâm thế nhẹ nhàng, tự tin."
+  ],
+  [
+    "Con yêu",
+    "Ba tin tương lai tươi sáng đang chờ đón nỗ lực của con."
+  ],
+  [
+    "Con yêu",
+    "Mẹ luôn thương yêu và gửi gắm trọn vẹn niềm tin nơi con."
+  ],
+  [
+    "Con yêu",
+    "Ba mong con học thật sâu, hiểu thật kỹ và ứng dụng tốt."
+  ],
+  [
+    "Con yêu",
+    "Mẹ mong con biết chia sẻ và giúp đỡ bạn bè cùng tiến bộ."
+  ],
+  [
+    "Con yêu",
+    "Ba chúc con luôn nhiều năng lượng tích cực mỗi ngày đến lớp."
+  ],
+  [
+    "Con yêu",
+    "Mẹ chúc con luôn giữ trái tim ấm áp và tinh thần kiên cường."
+  ],
+  [
+    "Con yêu",
+    "Ba tự hào vì con luôn biết phấn đấu và vươn lên."
+  ],
+  [
+    "Con yêu",
+    "Mẹ tự hào vì con đã nỗ lực không ngừng nghỉ suốt thời gian qua."
+  ],
+  [
+    "Con yêu",
+    "Ba chúc con mở rộng tầm nhìn và tự tin hội nhập."
+  ],
+  [
+    "Con yêu",
+    "Mẹ chúc con có những kỷ niệm thanh xuân tươi đẹp nhất ở EIU."
+  ],
+  [
+    "Con yêu",
+    "Ba mong con luôn biết tự chăm sóc bản thân khi xa nhà."
+  ],
+  [
+    "Con yêu",
+    "Mẹ mong con ngủ ngon sau một ngày học tập vất vả."
+  ],
+  [
+    "Con yêu",
+    "Ba tin bản lĩnh sinh viên EIU sẽ giúp con tỏa sáng."
+  ],
+  [
+    "Con yêu",
+    "Mẹ tin sự chân thành sẽ giúp con kết nối được nhiều bạn tốt."
+  ],
+  [
+    "Con yêu",
+    "Ba luôn sẵn sàng lắng nghe mọi dự định và trăn trở của con."
+  ],
+  [
+    "Con yêu",
+    "Mẹ chúc con luôn vững tin vào giá trị của chính mình."
+  ],
+  [
+    "Con yêu",
+    "Ba chúc con có thêm nhiều cơ hội thực tập và học hỏi."
+  ],
+  [
+    "Con yêu",
+    "Mẹ luôn sẵn sàng nấu những món con thích mỗi khi con về nhà."
+  ],
+  [
+    "Con yêu",
+    "Ba mong con giữ nếp sống kỷ luật và tinh thần tự học."
+  ],
+  [
+    "Con yêu",
+    "Mẹ mong con biết lắng nghe và học hỏi điều tốt từ mọi người."
+  ],
+  [
+    "Con yêu",
+    "Ba tin con sẽ là niềm tự hào lớn của cả gia đình."
+  ],
+  [
+    "Con yêu",
+    "Mẹ chúc con luôn yêu đời và tràn đầy năng lượng tích cực."
+  ],
+  [
+    "Con yêu",
+    "Ba chúc con vượt qua kỳ thi với kết quả cao nhất."
+  ],
+  [
+    "Con yêu",
+    "Mẹ tự hào vì thấy con biết vượt qua những lúc mệt mỏi."
+  ],
+  [
+    "Con yêu",
+    "Ba mong con nuôi dưỡng ước mơ lớn và từng bước thực hiện."
+  ],
+  [
+    "Con yêu",
+    "Mẹ chúc con gặt hái được nhiều học bổng và thành tích tốt."
+  ],
+  [
+    "Con yêu",
+    "Ba luôn tin con có đủ nghị lực để vượt qua áp lực."
+  ],
+  [
+    "Con yêu",
+    "Mẹ mong con giữ gìn nụ cười tươi tắn trên môi mỗi ngày."
+  ],
+  [
+    "Con yêu",
+    "Ba chúc con tìm được người thầy giỏi dẫn dắt tương lai."
+  ],
+  [
+    "Con yêu",
+    "Mẹ tin con sẽ trở thành một người có ích và thành đạt."
+  ],
+  [
+    "Con yêu",
+    "Ba mong con trân trọng từng cơ hội học tập tại giảng đường."
+  ],
+  [
+    "Con yêu",
+    "Mẹ chúc con hoàn thành tốt mọi bài tập nhóm và thuyết trình."
+  ],
+  [
+    "Con yêu",
+    "Ba tự hào vì con đã biết sống có mục tiêu rõ ràng."
+  ],
+  [
+    "Con yêu",
+    "Mẹ luôn là nơi con có thể quay về tìm sự thanh thản."
+  ],
+  [
+    "Con yêu",
+    "Ba chúc con luôn bình tĩnh, tự tin trong mọi buổi thuyết trình."
+  ],
+  [
+    "Con yêu",
+    "Mẹ mong con biết trân trọng công sức và tình cảm của mọi người."
+  ],
+  [
+    "Con yêu",
+    "Ba mong con giữ vững sự trung thực và lòng nhân ái."
+  ],
+  [
+    "Con yêu",
+    "Mẹ chúc con khám phá thêm nhiều điều mới lạ và bổ ích."
+  ],
+  [
+    "Con yêu",
+    "Ba luôn ủng hộ mọi quyết định chín chắn của con."
+  ],
+  [
+    "Con yêu",
+    "Mẹ tự hào khi thấy con biết tự đưa ra những quyết định đúng đắn."
+  ],
+  [
+    "Con yêu",
+    "Ba chúc con rèn luyện tư duy phản biện và kỹ năng tốt."
+  ],
+  [
+    "Con yêu",
+    "Mẹ chúc con có những ngày sinh viên tràn ngập tiếng cười."
+  ],
+  [
+    "Con yêu",
+    "Ba tin con sẽ tạo dựng được sự nghiệp vững vàng mai sau."
+  ],
+  [
+    "Con yêu",
+    "Mẹ mong con luôn giữ vững ước mơ và không ngừng cố gắng."
+  ],
+  [
+    "Con yêu",
+    "Ba mong con không ngừng hoàn thiện bản thân mỗi ngày."
+  ],
+  [
+    "Con yêu",
+    "Mẹ tin con sẽ tìm được hướng đi đúng đắn cho tương lai."
+  ],
+  [
+    "Con yêu",
+    "Ba chúc con luôn tràn đầy nhiệt huyết trong các phong trào."
+  ],
+  [
+    "Con yêu",
+    "Mẹ chúc con luôn được thầy yêu bạn mến dưới mái trường EIU."
+  ],
+  [
+    "Con yêu",
+    "Ba tự hào vì thấy con ngày càng chững chạc và sâu sắc."
+  ],
+  [
+    "Con yêu",
+    "Mẹ tự hào vì con yêu của mẹ luôn sống rất tử tế."
+  ],
+  [
+    "Con yêu",
+    "Ba chúc con có một tương lai rộng mở và hạnh phúc."
+  ],
+  [
+    "Con yêu",
+    "Mẹ mong con biết nghỉ ngơi hợp lý để tái tạo năng lượng."
+  ],
+  [
+    "Con yêu",
+    "Ba mong con luôn ghi nhớ bài học từ những người đi trước."
+  ],
+  [
+    "Con yêu",
+    "Mẹ chúc con vượt qua mùa thi với kết quả thật rực rỡ."
+  ],
+  [
+    "Con yêu",
+    "Ba tin con sẽ làm nên những điều tuyệt vời bằng nỗ lực của mình."
+  ],
+  [
+    "Con yêu",
+    "Mẹ luôn nhớ và thương con, cố gắng lên con yêu nhé."
+  ],
+  [
+    "Con yêu",
+    "Ba chúc con một học kỳ thuận lợi, nhiều điểm số xứng đáng."
+  ],
+  [
+    "Con yêu",
+    "Mẹ mong con luôn tìm thấy niềm hứng khởi mỗi khi mở trang sách."
+  ],
+  [
+    "Con yêu",
+    "Ba luôn ở đây, đồng hành và tin tưởng con hết lòng."
+  ],
+  [
+    "Con yêu",
+    "Mẹ tin rằng mọi nỗ lực của con hôm nay sẽ được đền đáp xứng đáng."
+  ],
+  [
+    "Con yêu",
+    "Ba chúc con luôn vững tâm, bền chí trên con đường đã chọn."
+  ],
+  [
+    "Con yêu",
+    "Mẹ chúc con luôn bình an, mạnh mẽ và hạnh phúc trên mọi bước đi."
+  ]
 ]
