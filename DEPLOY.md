@@ -1,5 +1,7 @@
 # EIU Parent Day — Supabase và Vercel
 
+Nếu cài lần đầu từ source gốc, làm theo [HUONG_DAN_DEPLOY.md](HUONG_DAN_DEPLOY.md): có thứ tự chạy đủ SQL 001–006, cách lấy API keys và cấu hình từng bước trên Vercel.
+
 ## Luồng hoạt động
 
 `Điện thoại /join → POST /api/wishes trên Vercel → Supabase (pending) → /admin duyệt (approved) → Realtime → khung 5 lời chúc + cây 3D`.
@@ -34,7 +36,7 @@ on conflict (user_id) do nothing;
 
 Đây là UUID user Auth, không phải Project ID. Chỉ user có trong `admins` mới được duyệt. Nếu chỉ ban tổ chức đăng nhập, tắt cho phép người ngoài tự đăng ký trong cấu hình Auth. Khách gửi lời chúc không cần tài khoản.
 
-Cách cấp quyền theo email: mở `supabase/create-admin.sql`, thay `THAY_EMAIL_ADMIN_CUA_BAN` bằng email user đã tạo rồi chạy trong SQL Editor. Không đặt email/mật khẩu quản trị trong `.env.local`. Truy cập `https://eiu-parent-day-tree.vercel.app/admin` hoặc bấm nút **Quản trị** nhỏ ở góc trên trái trang chính, đăng nhập, chọn **Chờ duyệt → Duyệt**. Nút chứa QR dành cho ban tổ chức dẫn tới `/admin`; QR gửi lời chúc dành cho phụ huynh vẫn nằm trong khung lời chúc. Danh sách quản trị tự cập nhật qua Realtime; có nút Tải lại dự phòng.
+Cách cấp quyền theo email: mở `supabase/create-admin.sql`, thay email có sẵn trong biến `admin_email` bằng email user đã tạo rồi chạy trong SQL Editor. Không đặt email/mật khẩu quản trị trong `.env.local`. Truy cập `https://TEN-MIEN-CUA-BAN/admin` hoặc bấm nút **Quản trị** nhỏ ở góc trên trái trang chính, đăng nhập, chọn **Chờ duyệt → Duyệt**. Nút chứa QR dành cho ban tổ chức dẫn tới `/admin`; QR gửi lời chúc dành cho phụ huynh vẫn nằm trong khung lời chúc. Danh sách quản trị tự cập nhật qua Realtime; có nút Tải lại dự phòng.
 
 ### Công cụ Emergency và xóa toàn bộ
 
@@ -43,8 +45,8 @@ Sau migration 001, chạy **toàn bộ** `supabase/migrations/003_admin_operatio
 Nếu đã cài bản 003 cũ và nút xóa báo lỗi, chạy `supabase/migrations/004_fix_admin_delete.sql`. File này chỉ cập nhật hàm xóa để có điều kiện `WHERE id IS NOT NULL`, tương thích với cơ chế safeupdate của Supabase; không tự xóa dữ liệu khi chạy migration. Sau đó thử lại từ `/admin`. Bản frontend mới hiển thị mã lỗi cụ thể thay cho thông báo chung; cần deploy lại frontend để nhận cách báo lỗi mới.
 
 - **Emergency**: mỗi lần bấm thêm đúng 10 lời với đủ 4 màu lá vào `wishes`, trạng thái `approved`, nguồn `emergency`. Màn hình nhận qua Realtime, mỗi lời tương ứng một chiếc lá đổi màu. Có thể bấm lại sau khi lượt trước hoàn tất. Bộ mẫu dùng lần lượt, không lặp trước khi hết 120 lời rồi quay vòng; mỗi bản ghi luôn có UUID mới.
-- Lời mẫu đứng tên **EIU Parent Day**, được gắn nhãn **Lời mẫu Emergency** trong quản trị. Đây là nội dung dự phòng do ban tổ chức tạo, không gán tên khách tham dự. Bộ nội dung gốc nằm trong `supabase/emergency-messages.json`.
-- Bộ 120 mẫu là lời ngắn **ba mẹ gửi cho con**, người nhận **Con yêu**, xoay quanh học tập, sự cố gắng, sức khỏe, ước mơ, gia đình và sự tử tế. Nếu đã cài bản cũ, chạy `supabase/migrations/006_ten_colorful_parent_wishes.sql` để cập nhật 120 mẫu và giới hạn 10 lời mỗi lượt. Migration chỉ áp dụng cho các lượt Emergency tiếp theo; không sửa lời đã đăng hoặc đặt lại vị trí quay vòng.
+- Lời mẫu có tên người gửi dự phòng như **Mẹ Lan**, **Ba Hùng**, được gắn nhãn **Lời mẫu Emergency** trong quản trị. Đây là nội dung do ban tổ chức tạo. Bộ nội dung gốc nằm trong `supabase/emergency-messages.json`.
+- Bộ 120 mẫu là lời ngắn **ba mẹ gửi cho con**, dùng tên người nhận tiếng Việt hai từ, xoay quanh học tập, sự cố gắng, sức khỏe, ước mơ, gia đình và sự tử tế. Nếu đã cài bản cũ, chạy `supabase/migrations/006_ten_colorful_parent_wishes.sql` để cập nhật 120 mẫu và giới hạn 10 lời mỗi lượt. Migration chỉ áp dụng cho các lượt Emergency tiếp theo; không sửa lời đã đăng hoặc đặt lại vị trí quay vòng.
 - **Xóa tất cả**: xóa vĩnh viễn toàn bộ lời chúc ở mọi trạng thái, gồm cả lời mẫu, và gỡ thư khỏi cây. Không xóa tài khoản Auth hoặc quyền admin. Nhập `XOA TAT CA` và bấm xác nhận. Không thể hoàn tác trong ứng dụng.
 - Mỗi thao tác có mã yêu cầu riêng để thử lại sau lỗi mạng mà không thêm hai đợt hoặc xóa nhầm đợt mới. Quyền được kiểm tra trong hàm SQL; tài khoản đăng nhập không có trong `admins` không thể thực hiện.
 - Nếu sửa bộ 120 mẫu: chạy `node scripts/build-admin-migration.mjs`, rồi chạy lại file SQL 003 đã tạo trên Supabase. Không giảm hoặc tăng số mẫu ngoài 120.

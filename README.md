@@ -39,6 +39,8 @@ Lá giữ nguyên vị trí và kích thước khi nhận lời chúc. Chế đ�
 
 ## Kết nối Supabase / Vercel
 
+Hướng dẫn từng bước từ source gốc: [HUONG_DAN_DEPLOY.md](HUONG_DAN_DEPLOY.md) — tạo Supabase, chạy SQL 001–006, tạo admin, lấy API keys và nhập vào Vercel, deploy và kiểm tra bằng điện thoại.
+
 Xem DEPLOY.md và .env.example. Khi chưa có biến Supabase, ứng dụng chạy demo có nhãn rõ trong khung và trang gửi. Khi chạy Vite dev, dữ liệu demo dùng chung trong RAM trên máy tính để thử QR qua Wi-Fi. Khi build production chưa có Supabase, demo chỉ lưu bằng localStorage trên từng trình duyệt.
 
 Bản live: khách gửi qua Vercel API → lưu trạng thái pending → ban tổ chức duyệt → Supabase Realtime cập nhật trang chiếu. Có tải lại định kỳ 15 giây dự phòng. Chưa xác nhận end-to-end với dịch vụ thật khi chưa có cấu hình.
