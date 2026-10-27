@@ -72,7 +72,7 @@ export default function Tree(props: Props) {
     const {oak,roots} = createAncientOak(); scene.add(oak,roots); oak.updateMatrixWorld(true);
     const bang = installBangFoliage(oak);
     bang.texture.anisotropy = Math.min(16,renderer.capabilities.getMaxAnisotropy());
-    const decor = createWishLeaves(bang.foliage);
+    const decor = createWishLeaves(bang.foliage,motion.matches);
     const raycaster=new THREE.Raycaster(),pointer=new THREE.Vector2();
     let press:{x:number;y:number;id:number;dragged:boolean} | undefined,hoverTime=0;
     function pick(clientX:number,clientY:number) {
@@ -106,7 +106,7 @@ export default function Tree(props: Props) {
     launch.current = () => {
       const event=state.current.arrival;
       if (!event || event.token === lastToken) return;
-      lastToken=event.token; decor.highlight(event.id);
+      lastToken=event.token; decor.announce(event.id,now);
     }; launch.current();
     let resolution=1,resolutionCeiling=1;
     const quality=new RenderQuality();

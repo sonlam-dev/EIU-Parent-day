@@ -30,10 +30,51 @@ test('Wishes only recolour existing crown leaves without changing geometry or tr
   assert.deepEqual(mesh.instanceMatrix.array,matrices);
   let changed=0;
   for(let i=0;i<mesh.count;i++)if(original.slice(i*3,i*3+3).some((value,k)=>value!==mesh.instanceColor.array[i*3+k]))changed++;
-  assert.equal(changed,2);
+  assert.equal(changed,16);
   const version=mesh.instanceColor.version;leaves.sync([wish(1),{...wish(2),color:'pink'},wish(3,'pending')],2);leaves.update(30);
   assert.equal(mesh.instanceColor.version,version);
   leaves.sync([],40);assert.deepEqual(mesh.instanceColor.array,original);
+});
+
+test('Each live or Emergency arrival glows on eight distinct leaves for 1–2 seconds without replaying history',()=>{
+  const mesh=foliage(80),leaves=createWishLeaves(mesh);
+  const history=wish(1),live={...wish(2),color:'pink'},sample={...wish(3),source:'emergency',color:'gold'};
+  leaves.sync([history],0);
+  const pulse=mesh.geometry.getAttribute('wishPulse');
+  assert.ok(Array.from({length:80},(_,i)=>pulse.getX(i)).every(t=>t===-10),'History must not flash');
+  const slots=[];
+  for(const [index,row] of [live,sample].entries()) {
+    const now=10+index*3;
+    leaves.sync([history,live,...(index ? [sample] : [])],now);
+    leaves.announce(row.id,now);
+    const active=Array.from({length:80},(_,i)=>i).filter(i=>pulse.getX(i)>=now);
+    assert.equal(active.length,8);
+    assert.equal(new Set(active).size,8);
+    for(const slot of active) {
+      assert.ok(pulse.getX(slot)>=now && pulse.getX(slot)<now+.18);
+      assert.ok(pulse.getX(slot)+pulse.getY(slot)>now+1 && pulse.getX(slot)+pulse.getY(slot)<now+2);
+    }
+    slots.push(active);
+  }
+  assert.ok(slots[0].every(slot=>!slots[1].includes(slot)),'Use fresh leaves while the crown has space');
+  const shader={uniforms:{},vertexShader:'#include <color_vertex>',fragmentShader:'#include <emissivemap_fragment>'};
+  mesh.material.onBeforeCompile(shader,{});
+  assert.ok(shader.vertexShader.includes('smoothstep(0.0,0.45,wishAge)'));
+  assert.ok(shader.fragmentShader.includes('totalEmissiveRadiance +='));
+  const versions=[pulse.version,mesh.instanceColor.version];
+  leaves.update(13.8);assert.equal(shader.uniforms.uWishTime.value,13.8);
+  leaves.update(16);assert.deepEqual([pulse.version,mesh.instanceColor.version],versions,'Animation only advances a uniform, without per-frame buffer uploads');
+  leaves.sync([history,live],17);
+  for(const slot of slots[1])assert.equal(pulse.getX(slot),-10,'Hiding a wish stops its glow');
+  leaves.dispose();assert.equal(mesh.geometry.getAttribute('wishPulse'),undefined);
+});
+
+test('Reduced motion keeps all eight colours while suppressing the arrival pulse',()=>{
+  const mesh=foliage(),leaves=createWishLeaves(mesh,true);
+  leaves.sync([wish(1)],0);leaves.announce('wish-1',1);
+  const pulse=mesh.geometry.getAttribute('wishPulse');
+  assert.ok(Array.from({length:32},(_,i)=>pulse.getX(i)).every(t=>t===-10));
+  assert.equal(leaves.count,1);
 });
 
 test('Large events reuse existing foliage and picking opens the associated wish',()=>{
