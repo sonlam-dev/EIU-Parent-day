@@ -8,9 +8,9 @@ import { createMeadow } from './Meadow';
 import { createAncientOak } from './ancientTree';
 import { createYellowFlowers } from './Flowers';
 import { installBangFoliage } from './BangFoliage';
-import { createParentDayDecor } from './ParentDayDecor';
+import { createWishLeaves } from './WishLeaves';
 import { RenderQuality,renderPixelRatio } from './RenderQuality';
-import EnvelopeWish from './EnvelopeWish';
+import WishLeafDialog from './WishLeafDialog';
 import { createMorningSky } from './MorningSky';
 import { daylightBalance } from './Daylight';
 
@@ -39,7 +39,7 @@ export default function Tree(props: Props) {
     // Refresh shadows only after a meaningful change in the viewing/sun angle.
     renderer.shadowMap.autoUpdate=false; renderer.shadowMap.needsUpdate=true;
     renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.toneMappingExposure = .96;
-    el.appendChild(renderer.domElement); renderer.domElement.setAttribute('aria-label','Cây tri ân 3D với tán lá nhỏ, dày. Mỗi lời chúc được treo lên cây bằng một bao thư thả dây xuống.');
+    el.appendChild(renderer.domElement); renderer.domElement.setAttribute('aria-label','Cây yêu thương 3D với thân gỗ lớn và tán lá dày. Nhấn vào chiếc lá có lời chúc để đọc và tải hình.');
     const scene = new THREE.Scene();
     scene.fog=new THREE.Fog('#b4dcf6',65,190);
     const camera = new THREE.PerspectiveCamera(38,1,.1,3000); camera.position.set(21,11,34); camera.lookAt(0,7,0);
@@ -52,7 +52,7 @@ export default function Tree(props: Props) {
         lastReset = state.current.view.reset;
         const mobile=el.clientWidth<700;
         camera.position.set(mobile ? 34 : 21,mobile ? 15 : 11,mobile ? 55 : 34);
-        controls.target.set(0,mobile ? 7.8 : 7,0); controls.update();
+        controls.target.set(0,mobile ? 9 : 7.5,0); controls.update();
       }
     }; applyView.current();
     const sunDirection=new THREE.Vector3(-.95,.28,-1).normalize();
@@ -69,10 +69,10 @@ export default function Tree(props: Props) {
     const shadowSun=new THREE.Vector3();
     const viewingDirection=new THREE.Vector3();
     let windFactor=0;
-    const {oak,roots,crownLift} = createAncientOak(); scene.add(oak,roots); oak.updateMatrixWorld(true);
-    const bang = installBangFoliage(oak,crownLift);
+    const {oak,roots} = createAncientOak(); scene.add(oak,roots); oak.updateMatrixWorld(true);
+    const bang = installBangFoliage(oak);
     bang.texture.anisotropy = Math.min(16,renderer.capabilities.getMaxAnisotropy());
-    const decor = createParentDayDecor(scene,bang.anchors,motion.matches,camera,crownLift);
+    const decor = createWishLeaves(bang.foliage);
     const raycaster=new THREE.Raycaster(),pointer=new THREE.Vector2();
     let press:{x:number;y:number;id:number;dragged:boolean} | undefined,hoverTime=0;
     function pick(clientX:number,clientY:number) {
@@ -101,8 +101,7 @@ export default function Tree(props: Props) {
     sync.current = () => {
       if (!state.current.ready) return;
       decor.sync(state.current.wishes,now);
-      renderer.domElement.dataset.envelopeCount=String(decor.count);
-      renderer.domElement.dataset.activeDrops=String(decor.activeDrops);
+      renderer.domElement.dataset.leafCount=String(decor.count);
     }; sync.current();
     launch.current = () => {
       const event=state.current.arrival;
@@ -139,11 +138,11 @@ export default function Tree(props: Props) {
         const nextMobile=width<700;
         if (mobile!==nextMobile) {
           camera.position.set(nextMobile ? 34 : 21,nextMobile ? 15 : 11,nextMobile ? 55 : 34);
-          controls.target.set(0,nextMobile ? 7.8 : 7,0); controls.update();
+          controls.target.set(0,nextMobile ? 9 : 7.5,0); controls.update();
         }
         const initial=mobile===undefined; mobile=nextMobile;
         camera.aspect=width/height;
-        camera.setViewOffset(width,height,nextMobile ? 0 : width*.11,nextMobile ? -height*.08 : 0,width,height);
+        camera.setViewOffset(width,height,nextMobile ? 0 : width*.19,nextMobile ? -height*.08 : 0,width,height);
         resolutionCeiling=renderPixelRatio(width,height,devicePixelRatio);
         resolution=initial ? resolutionCeiling : Math.min(resolution,resolutionCeiling);
         quality.reset(); sampleTime=0; sampleFrames=0;
@@ -156,7 +155,7 @@ export default function Tree(props: Props) {
       controls.autoRotate = isRotating; controls.autoRotateSpeed = state.current.view.speed * .8; controls.update(dt);
       const targetWind = isRotating ? Math.min(1.4, Math.max(0.65, state.current.view.speed)) : 0;
       windFactor = THREE.MathUtils.damp(windFactor, targetWind, 2.5, dt);
-      morning.update(now,camera); meadow.update(now); flowers.update(now); decor.update(now, windFactor); oak.update(motion.matches ? 0 : now);
+      morning.update(now,camera); meadow.update(now); flowers.update(now); decor.update(now, windFactor); bang.update(motion.matches ? 0 : now);
       sun.position.copy(sunDirection).multiplyScalar(55).add(sun.target.position);
       fill.position.copy(camera.position); fill.position.y=Math.max(camera.position.y,12);
       viewingDirection.copy(camera.position).sub(controls.target);
@@ -172,12 +171,12 @@ export default function Tree(props: Props) {
         if (now > 5) {
           resolution=quality.sample(resolution,resolutionCeiling,fps,sampleTime);
         }
-        Object.assign(renderer.domElement.dataset,{activeDrops:String(decor.activeDrops),activeGlows:String(decor.activeGlows),fps:fps.toFixed(1),pixelRatio:resolution.toFixed(2),drawCalls:String(renderer.info.render.calls),triangles:String(renderer.info.render.triangles)});
+        Object.assign(renderer.domElement.dataset,{fps:fps.toFixed(1),pixelRatio:resolution.toFixed(2),drawCalls:String(renderer.info.render.calls),triangles:String(renderer.info.render.triangles)});
         sampleTime=0; sampleFrames=0;
       }
     } render();
     return () => {
-      disposed=true;assets.cancel();clearTimeout(compileTimer);
+      disposed=true;decor.dispose();assets.cancel();clearTimeout(compileTimer);
       cancelAnimationFrame(frame); resize.disconnect(); controls.dispose();
       canvas.removeEventListener('pointerdown',pointerDown); canvas.removeEventListener('pointerup',pointerUp);
       canvas.removeEventListener('pointermove',pointerMove); canvas.removeEventListener('pointercancel',cancelPress);
@@ -188,6 +187,6 @@ export default function Tree(props: Props) {
     };
   },[]);
   const selectedWish=props.wishes.find(wish => wish.id===selectedId && wish.status==='approved');
-  return <><div className="event-world" data-scene-ready={sceneReady}><div ref={host} className="scene-canvas"/>{failed ? <div className="screen-loading"><span>🌳</span><p>Không khởi tạo được WebGL. Hãy mở màn hình chiếu bằng trình duyệt hỗ trợ tăng tốc đồ họa.</p></div> : <div className="scene-loading-veil" aria-hidden={sceneReady}><div className="scene-loading-caption" role="status"><span className="scene-loading-mark"><Sprout size={32}/></span><p>Loading.......</p></div></div>}</div>{selectedId && <EnvelopeWish key={selectedId} wish={selectedWish} onClose={() => setSelectedId(null)}/>}</>;
+  return <><div className="event-world" data-scene-ready={sceneReady}><div ref={host} className="scene-canvas"/>{failed ? <div className="screen-loading"><span>🌳</span><p>Không khởi tạo được WebGL. Hãy mở màn hình chiếu bằng trình duyệt hỗ trợ tăng tốc đồ họa.</p></div> : <div className="scene-loading-veil" aria-hidden={sceneReady}><div className="scene-loading-caption" role="status"><span className="scene-loading-mark"><Sprout size={32}/></span><p>Loading.......</p></div></div>}</div>{selectedId && <WishLeafDialog key={selectedId} wish={selectedWish} onClose={() => setSelectedId(null)}/>}</>;
 }
 

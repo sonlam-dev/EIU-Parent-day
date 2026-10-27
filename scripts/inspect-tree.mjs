@@ -9,9 +9,9 @@ const {installBangFoliage} = await import('../src/BangFoliage.ts');
 installBangFoliage(oak,crownLift);
 const bounds = new THREE.Box3().setFromObject(oak),size = bounds.getSize(new THREE.Vector3());
 oak.updateMatrixWorld(true);
-const camera = new THREE.PerspectiveCamera(38,16 / 9,.1,400); camera.position.set(21,11,34); camera.lookAt(0,7,0); camera.setViewOffset(1920,1080,1920 * .11,0,1920,1080); camera.updateMatrixWorld(true);
+const camera = new THREE.PerspectiveCamera(38,16 / 9,.1,400); camera.position.set(21,11,34); camera.lookAt(0,7,0); camera.setViewOffset(1920,1080,1920 * .19,0,1920,1080); camera.updateMatrixWorld(true);
 let minX=1,maxX=-1,minY=1,maxY=-1;
-for (const mesh of [oak.branchesMesh,oak.leavesMesh]) {
+for (const mesh of oak.children) {
   const p=mesh.geometry.attributes.position;
   if (mesh.geometry.index?.array instanceof Uint16Array && p.count > 65535) throw Error('Geometry exceeds its 16-bit index capacity');
   const instances = mesh instanceof THREE.InstancedMesh ? mesh.count : 1;
@@ -22,5 +22,5 @@ for (const mesh of [oak.branchesMesh,oak.leavesMesh]) {
   }
 }
 if (minY < -1 || maxY > 1) throw Error('Tree is vertically cropped');
-console.log(JSON.stringify({height:size.y,width:size.x,treeCount:1,exposedRoots:roots.children.length,broadLeaves:oak.leavesMesh.count,leafGeometryVertices:oak.leavesMesh.geometry.attributes.position.count,screenPercent:{left:(minX+1)*50,right:(maxX+1)*50,top:(1-maxY)*50,bottom:(1-minY)*50}},null,2));
+console.log(JSON.stringify({height:size.y,width:size.x,treeCount:1,broadLeaves:oak.getObjectByName('Veined botanical leaves').count,leafGeometryVertices:oak.getObjectByName('Veined botanical leaves').geometry.attributes.position.count,screenPercent:{left:(minX+1)*50,right:(maxX+1)*50,top:(1-maxY)*50,bottom:(1-minY)*50}},null,2));
 

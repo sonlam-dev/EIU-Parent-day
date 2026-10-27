@@ -1,0 +1,24 @@
+.eiu-logo-plaque{display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;width:158px;padding:13px 17px;border-radius:10px;background:#145c47}
+.eiu-logo-plaque img{display:block;width:100%;height:auto;object-fit:contain}
+.admin-login.admin-panel{max-width:500px;padding:36px;border-radius:20px;box-shadow:0 18px 60px #244c3610}
+.admin-login .eiu-logo-plaque{margin-bottom:26px;width:190px}
+.admin-login h2{margin-bottom:12px;text-wrap:balance}
+.admin-login>p{margin-bottom:26px}
+.admin-login label{font-size:12px}
+.admin-login input{min-height:48px;font-size:16px}
+.join-header,.join-content{max-width:720px}
+.join-content{margin-top:44px}
+.join-description{max-width:600px;font-size:14px}
+.join-form-card{padding:32px}
+.join-form-brand{display:flex;align-items:center;gap:18px;margin-bottom:28px;padding-bottom:24px;border-bottom:1px solid #e2e8d6}
+.join-form-brand>span:last-child{font-size:10px;letter-spacing:1.4px;line-height:1.8;color:#708565}
+.join-form-card .form-row{grid-template-columns:1fr 1fr;gap:20px}
+.join-form-card .wish-form textarea{min-height:190px}
+.join-form-card .form-foot{font-size:10px;text-align:center}
+@media(max-width:700px){
+  .admin-login.admin-panel{padding:26px 22px}
+  .join-content{margin-top:28px}
+  .join-form-card{padding:24px 20px}
+  .join-form-card .form-row{grid-template-columns:1fr;gap:0}
+  .join-form-brand{gap:12px;align-items:flex-start;flex-direction:column}
+}

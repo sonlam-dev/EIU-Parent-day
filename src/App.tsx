@@ -3,10 +3,13 @@ import { ArrowLeft, ArrowRight, Check, Copy, Download, Leaf, QrCode, Sprout } fr
 import QRCode from 'qrcode';
 import { demo, fetchWishes, supabase } from './data';
 import { type Wish } from './types';
-import WishForm from './WishForm';
+import JoinPage from './JoinPage';
 import { WishPresentation,nextWishInterval } from './WishPresentation';
 import WishFeed from './WishFeed';
 import AdminEntry from './AdminEntry';
+import BrandLogo from './BrandLogo';
+import LeafKeepsake from './LeafKeepsake';
+import {readSavedLeaves,saveLeaf} from './SavedLeaves';
 import SceneControls from './SceneControls';
 import eiuLogo from './assets/eiu-logo.png';
 const Tree = lazy(() => import('./Tree'));
@@ -22,7 +25,11 @@ export default function App() {
   const [presented,setPresented]=useState<{treeWishes:Wish[];feed:Wish[];ready:boolean}>({treeWishes:[],feed:[],ready:false});
   const [arrival,setArrival] = useState<Arrival | null>(null);
   const [connection,setConnection]=useState<'connecting'|'live'|'retrying'|'demo'>(demo ? 'demo' : 'connecting');
-  const [receipt,setReceipt] = useState(false); const [formKey,setFormKey] = useState(0);
+  const [savedLeaves,setSavedLeaves]=useState(readSavedLeaves);
+  const [selectedLeafId,setSelectedLeafId]=useState('');
+  const [remembered,setRemembered]=useState(true);
+  const myLeaf=savedLeaves.find(wish=>wish.id===selectedLeafId)||savedLeaves[0];
+  const [receipt,setReceipt] = useState(()=>readSavedLeaves().length>0); const [formKey,setFormKey] = useState(0);
   const [qr,setQr] = useState(''); const [copied,setCopied] = useState(false);
   const [lanOrigin,setLanOrigin] = useState(''); const [sharedDemo,setSharedDemo] = useState(false);
   const presentation = useRef(new WishPresentation()); const playing = useRef(false);
@@ -77,10 +84,10 @@ export default function App() {
   },[wishes,loading,error,joining,setup,path]);
   useEffect(() => () => { clearTimeout(timer.current); playing.current = false; },[]);
   useEffect(() => { if (setup) void QRCode.toDataURL(shareUrl,{width:900,margin:3,errorCorrectionLevel:'M',color:{dark:'#254e36',light:'#ffffff'}}).then(setQr).catch(() => setError('Không tạo được QR.')); },[shareUrl,setup]);
-  function submitted(_wish?: Wish) { void refresh(); setReceipt(true); setFormKey(k => k + 1); window.scrollTo({top:0,behavior:'smooth'}); }
+  function submitted(wish: Wish) {setRemembered(saveLeaf(wish));setSavedLeaves(old=>[wish,...old.filter(row=>row.id!==wish.id)].slice(0,20));setSelectedLeafId(wish.id);void refresh(); setReceipt(true); setFormKey(k => k + 1); window.scrollTo({top:0,behavior:'smooth'}); }
   async function copy() { try { await navigator.clipboard.writeText(shareUrl); setCopied(true); } catch { setError('Vui lòng chọn và sao chép liên kết trong ô.'); } }
   if (path.startsWith('/admin')) return <Suspense fallback={<div className="loading">Đang mở quản trị…</div>}><Admin/></Suspense>;
-  if (joining) return <main className="join-page"><header className="join-header"><a href="/join" className="join-brand"><img src={eiuLogo} alt="EIU Logo" className="join-brand-logo" width="95" height="27" /><span className="join-brand-divider" aria-hidden="true">/</span><span className="join-brand-title"><Sprout size={20}/> Cây yêu thương</span><span className="join-brand-tag">PARENT DAY</span></a></header><section className="join-content">{receipt ? <div className="join-success" role="status"><div className="join-success-icon"><Check size={36}/></div><span className="join-overline">CẢM ƠN BẠN ĐÃ GỬI MỘT BAO THƯ</span><h1>Yêu thương<br/><em>đã được gửi đi.</em></h1><p>{demo ? 'Lời chúc đã được lưu trong bản trải nghiệm. Theo dõi màn hình chiếu để xem bao thư của bạn được thả dây xuống cây.' : 'Lời chúc đang chờ ban tổ chức duyệt. Sau khi được duyệt, bao thư của bạn sẽ được treo lên cây trên màn hình sự kiện.'}</p><button className="btn full" onClick={() => setReceipt(false)}>Gửi thêm một lời chúc <ArrowRight size={18}/></button><a href="/" className="join-back"><Leaf size={16}/> Ngắm cây yêu thương</a></div> : <><span className="join-overline">MỖI LỜI TRI ÂN · MỘT BAO THƯ</span><h1>Có lời yêu thương,<br/><em>hãy nói hôm nay.</em></h1><p className="join-description">Gửi lời chúc, lời yêu thương đến con và các bạn sinh viên EIU. Mỗi lời nhắn sẽ được đặt vào một bao thư và treo lên cây chung.</p><div className="join-form-card"><WishForm key={formKey} onSuccess={submitted} sharedDemo={sharedDemo}/></div><p className="join-community"><Leaf size={15}/>{loading ? 'Đang đón những lời yêu thương…' : `${wishes.length.toLocaleString('vi')} bao thư yêu thương đã được treo lên cây`}</p></>}{demo && <p className="join-demo">{sharedDemo ? 'Demo Wi-Fi · Lời chúc dùng chung trong phiên local này' : 'Bản trải nghiệm · Dữ liệu chỉ lưu trên trình duyệt này'}</p>}{error && <p role="alert" className="form-error">{error}</p>}</section><footer className="join-footer">Eastern International University · Parent Day</footer></main>;
+  if (joining) return <JoinPage receipt={receipt} myLeaf={myLeaf} savedLeaves={savedLeaves} remembered={remembered} formKey={formKey} sharedDemo={sharedDemo} loading={loading} wishes={wishes} error={error} onSuccess={submitted} onNewWish={()=>setReceipt(false)} onSelect={setSelectedLeafId} onReturn={()=>setReceipt(true)}/>;
   if (setup) return <main className="setup-page"><a href="/" className="text-btn"><ArrowLeft size={17}/> Về màn hình chiếu</a><Sprout size={35}/><h1>Chuẩn bị cho Parent Day</h1><p>Trang chiếu chỉ có cây, đồng cỏ và lời chúc. Sử dụng các liên kết ở đây để vận hành.</p><div className="setup-links"><a href="/" className="btn" target="_blank" rel="noreferrer">Mở màn hình chiếu <ArrowRight size={16}/></a><a href="/join" className="btn secondary" target="_blank" rel="noreferrer">Mở trang gửi lời chúc</a><a href="/admin" className="btn secondary">Duyệt lời chúc</a></div><div className="setup-qr"><QrCode size={24}/><h2>QR dành cho khách</h2>{qr && <img src={qr} alt="QR mở trang gửi lời chúc" width="260" height="260"/>}<input aria-label="Liên kết khách tham gia" value={shareUrl} readOnly onFocus={e => e.target.select()}/><div><button className="btn secondary" onClick={() => void copy()}>{copied ? <Check size={16}/> : <Copy size={16}/>} {copied ? 'Đã chép' : 'Chép link'}</button>{qr && <a className="btn" href={qr} download="parent-day-qr.png"><Download size={16}/> Tải QR PNG</a>}</div></div><p className="setup-note">{demo ? 'Bản demo Wi-Fi đang dùng chung dữ liệu tạm trên máy. Quét QR bằng điện thoại cùng Wi-Fi và gửi lời chúc để thử trên màn hình chiếu. Dữ liệu được xóa khi server khởi động lại.' : 'Kết nối Supabase đã được cấu hình. Duyệt lời chúc tại /admin để đưa lên màn hình.'}</p><p className="setup-note">Nếu QR chứa localhost, điện thoại khác chưa truy cập được. Sau khi kết nối Vercel, đặt VITE_SITE_URL bằng tên miền chính thức và tạo lại QR. Trên máy chiếu, dùng F11 để toàn màn hình.</p>{error && <p className="form-error">{error}</p>}</main>;
   return <main className="event-screen"><AdminEntry url={new URL('/admin',shareUrl).href}/><SceneControls view={view} setView={setView}/><Suspense fallback={<div className="scene-loading-fallback"><div className="scene-loading-caption" role="status"><span className="scene-loading-mark"><Sprout size={32}/></span><p>Loading.......</p></div></div>}><Tree wishes={presented.treeWishes} ready={presented.ready} arrival={arrival} view={view}/></Suspense><WishFeed shareUrl={shareUrl} wishes={presented.feed} loading={loading} connection={connection} error={error} total={presented.treeWishes.length}/></main>;
 }

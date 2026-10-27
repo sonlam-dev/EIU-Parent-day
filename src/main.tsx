@@ -7,3 +7,5 @@ import './WishFeed.css';
 import './Admin.css';
 import './SceneEntrance.css';
 ReactDOM.createRoot(document.getElementById('root')!).render(<React.StrictMode><App /></React.StrictMode>);
+import './brand.css';
+import './leaf.css';

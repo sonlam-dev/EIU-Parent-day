@@ -1,0 +1,18 @@
+.leaf-keepsake{max-width:650px;margin:0 auto 24px;text-align:center}
+.leaf-keepsake img{display:block;width:100%;height:auto;margin:0 auto 18px;border-radius:18px}
+.leaf-keepsake>p{display:flex;gap:7px;align-items:center;justify-content:center;font-size:11px;line-height:1.8;margin:14px auto;color:#617e5d}
+.leaf-storage-note{font-size:11px!important;line-height:1.8!important;margin:18px auto!important;max-width:480px!important}
+.join-success>.leaf-keepsake .btn{max-width:none}
+.saved-leaf-picker{display:block;text-align:left;max-width:500px;margin:24px auto 0;font-size:12px;line-height:1.8;color:#456641}
+.saved-leaf-picker select{display:block;width:100%;margin-top:8px;padding:12px;border:1px solid #d4dfc5;border-radius:8px;background:#fffef8;color:#355336;font:inherit}
+.saved-leaf-return{margin-bottom:20px}
+.join-brand .eiu-logo-plaque{width:145px;padding:10px 14px}
+.wish-leaf-dialog{width:min(760px,calc(100% - 28px));max-height:90dvh;overflow:auto;border:1px solid #d5e2c6;border-radius:22px;padding:36px;background:#f8fbef;color:#355336;box-shadow:0 25px 100px #18352544}
+.wish-leaf-dialog::backdrop{background:#153b2c66;backdrop-filter:blur(5px)}
+.event-screen .wish-leaf-dialog .wish-leaf-close{display:flex;position:absolute;right:14px;top:14px;align-items:center;justify-content:center;width:36px;height:36px;border:1px solid #d4dfc5;border-radius:50%;background:#fff;color:#355336}
+.wish-leaf-dialog h2{font-family:var(--serif);font-size:30px;line-height:1.4;margin:26px 0 18px;overflow-wrap:break-word}
+.wish-leaf-dialog blockquote{margin:0;font-size:18px;line-height:1.9;white-space:pre-line;overflow-wrap:break-word}
+.wish-leaf-sender{font-size:13px;margin:20px 0;color:#617e5d}
+.event-screen .wish-leaf-dialog .btn{display:inline-flex}
+.wish-leaf-dialog .leaf-keepsake>p{display:none}
+@media(max-width:700px){.wish-leaf-dialog{padding:28px 20px}.wish-leaf-dialog h2{font-size:25px}.join-brand .eiu-logo-plaque{width:110px;padding:8px 10px}.join-brand-title{font-size:12px}.join-brand-tag{display:none}.leaf-keepsake>p{font-size:10px}}

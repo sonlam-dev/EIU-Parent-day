@@ -9,14 +9,13 @@ globalThis.document={createElement:()=>({width:256,height:256,getContext:()=>new
   createLinearGradient:()=>({addColorStop(){}}),createRadialGradient:()=>({addColorStop(){}}),
 },{get:(target,key)=>target[key]||(()=>{}),set:(target,key,value)=>{target[key]=value;return true;}})})};
 
-test('New flowers fill local gaps and leave occupied flower positions intact',()=>{
-  const {positions,patches}=createFlowerLayout(),original=positions.slice(0,1800);
-  assert.equal(positions.length,2520); assert.equal(patches.length,12);
-  for(const point of positions.slice(1800)) {
-    assert.ok(Math.hypot(point.x,point.z)<17);
-    assert.ok(patches.some(p=>Math.hypot(p.x-point.x,p.z-point.z)<=1.251));
-    assert.ok(original.every(p=>Math.hypot(p.x-point.x,p.z-point.z)>=.449));
-  }
+test('Wildflower beds leave a clear root area and stay within a light geometry budget',()=>{
+  const layout=createFlowerLayout(),again=createFlowerLayout();
+  assert.deepEqual(layout,again);
+  assert.equal(layout.patches.length,12);
+  assert.ok(layout.positions.length<=900);
+  assert.ok(layout.positions.every(p=>Math.hypot(p.x,p.z)>5));
+  assert.ok(layout.positions.slice(360).every(point=>layout.patches.some(p=>Math.hypot(p.x-point.x,p.z-point.z)<=1.651)));
 });
 
 test('Sun stays fixed as the camera orbits and flocks overlap throughout each loop',()=>{
@@ -56,8 +55,8 @@ test('Petal detail stays in one existing bed without adding geometry or per-fram
   const patch=patches.reduce((best,p)=>(p.x-6)**2+(p.z-7)**2<(best.x-6)**2+(best.z-7)**2 ? p : best);
   const detail=petals.geometry.getAttribute('aFlowerDetail');
   assert.equal(scene.children.length,4);
-  assert.deepEqual(scene.children.map(mesh=>mesh.count),[20160,2520,2520,5040]);
-  assert.equal(scene.children.reduce((sum,mesh)=>sum+mesh.geometry.index.count/3*mesh.count,0),372960);
+  assert.deepEqual(scene.children.map(mesh=>mesh.count),[positions.length*8,positions.length,positions.length,positions.length*2]);
+  assert.ok(scene.children.reduce((sum,mesh)=>sum+mesh.geometry.index.count/3*mesh.count,0)<150000);
   let detailedCount=0;
   positions.forEach((point,i)=>{
     const expected=(point.x-patch.x)**2+(point.z-patch.z)**2<=4 ? 1 : 0;

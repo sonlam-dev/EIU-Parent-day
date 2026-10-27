@@ -25,7 +25,7 @@ function soilTexture() {
 
 /** Continuous green meadow, with grass extending to the horizon. */
 export function createMeadow(scene:THREE.Scene,reducedMotion:boolean) {
-  const groundGeometry=new THREE.PlaneGeometry(1200,1200,300,300); groundGeometry.rotateX(-Math.PI / 2);
+  const groundGeometry=new THREE.PlaneGeometry(1200,1200,160,160); groundGeometry.rotateX(-Math.PI / 2);
   const p=groundGeometry.attributes.position,groundColors=new Float32Array(p.count * 3),color=new THREE.Color();
   const green=new THREE.Color('#819b57'),variation=new THREE.Color('#6e8c4a');
   for (let i=0;i<p.count;i++) {
@@ -70,11 +70,11 @@ export function createMeadow(scene:THREE.Scene,reducedMotion:boolean) {
   const tiles:{px:number;pz:number;size:number;near:boolean;count:number}[]=[];
   for (let px=-3;px<=3;px++) for (let pz=-3;pz<=3;pz++) {
     const near=Math.abs(px)<=1 && Math.abs(pz)<=1;
-    tiles.push({px,pz,size:24,near,count:near ? 12000 : 4000});
+    tiles.push({px,pz,size:24,near,count:near ? 5000 : 1500});
   }
   for (let px=-2;px<=2;px++) for (let pz=-2;pz<=2;pz++) {
     if (Math.abs(px)<=1 && Math.abs(pz)<=1) continue;
-    tiles.push({px,pz,size:56,near:false,count:7000});
+    tiles.push({px,pz,size:56,near:false,count:2000});
   }
   for (const {px,pz,size,near,count} of tiles) {
     const mesh=new THREE.InstancedMesh(near ? nearGeometry : farGeometry,material,count);

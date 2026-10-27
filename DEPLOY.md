@@ -4,7 +4,7 @@
 
 `Điện thoại /join → POST /api/wishes trên Vercel → Supabase (pending) → /admin duyệt (approved) → Realtime → khung 5 lời chúc + cây 3D`.
 
-- Mỗi lời chúc được duyệt có đúng một lá thư trên cây. Không có lá thư trang trí giả.
+- Mỗi lời chúc được duyệt có đúng một chiếc lá đổi màu trên cây. Không có lá thư trang trí giả.
 - Lúc mở trang: khôi phục toàn bộ thư đã duyệt; khung hiện 5 lời mới nhất theo thứ tự cũ → mới từ trên xuống. Nếu chưa đủ 5, chỉ hiện số có thật.
 - Khi nhận lời mới: hiện thẻ và thêm thư cùng một lượt. Nếu khung đủ 5, thẻ cũ nhất cuộn lên, thẻ mới vào dưới cùng. Thư cũ vẫn trên cây.
 - Nhiều lời đến cùng lúc được xếp hàng theo thời gian, mỗi lượt cách nhau ngẫu nhiên 1–3 giây; không bỏ lời chúc. Cuộn kéo dài 0,6 giây. Bấm thẻ hoặc lá thư để đọc đầy đủ.
@@ -42,7 +42,7 @@ Sau migration 001, chạy **toàn bộ** `supabase/migrations/003_admin_operatio
 
 Nếu đã cài bản 003 cũ và nút xóa báo lỗi, chạy `supabase/migrations/004_fix_admin_delete.sql`. File này chỉ cập nhật hàm xóa để có điều kiện `WHERE id IS NOT NULL`, tương thích với cơ chế safeupdate của Supabase; không tự xóa dữ liệu khi chạy migration. Sau đó thử lại từ `/admin`. Bản frontend mới hiển thị mã lỗi cụ thể thay cho thông báo chung; cần deploy lại frontend để nhận cách báo lỗi mới.
 
-- **Emergency**: mỗi lần bấm thêm đúng 10 lời với đủ 4 màu bao thư vào `wishes`, trạng thái `approved`, nguồn `emergency`. Màn hình nhận qua Realtime, mỗi lời tương ứng một lá thư. Có thể bấm lại sau khi lượt trước hoàn tất. Bộ mẫu dùng lần lượt, không lặp trước khi hết 120 lời rồi quay vòng; mỗi bản ghi luôn có UUID mới.
+- **Emergency**: mỗi lần bấm thêm đúng 10 lời với đủ 4 màu lá vào `wishes`, trạng thái `approved`, nguồn `emergency`. Màn hình nhận qua Realtime, mỗi lời tương ứng một chiếc lá đổi màu. Có thể bấm lại sau khi lượt trước hoàn tất. Bộ mẫu dùng lần lượt, không lặp trước khi hết 120 lời rồi quay vòng; mỗi bản ghi luôn có UUID mới.
 - Lời mẫu đứng tên **EIU Parent Day**, được gắn nhãn **Lời mẫu Emergency** trong quản trị. Đây là nội dung dự phòng do ban tổ chức tạo, không gán tên khách tham dự. Bộ nội dung gốc nằm trong `supabase/emergency-messages.json`.
 - Bộ 120 mẫu là lời ngắn **ba mẹ gửi cho con**, người nhận **Con yêu**, xoay quanh học tập, sự cố gắng, sức khỏe, ước mơ, gia đình và sự tử tế. Nếu đã cài bản cũ, chạy `supabase/migrations/006_ten_colorful_parent_wishes.sql` để cập nhật 120 mẫu và giới hạn 10 lời mỗi lượt. Migration chỉ áp dụng cho các lượt Emergency tiếp theo; không sửa lời đã đăng hoặc đặt lại vị trí quay vòng.
 - **Xóa tất cả**: xóa vĩnh viễn toàn bộ lời chúc ở mọi trạng thái, gồm cả lời mẫu, và gỡ thư khỏi cây. Không xóa tài khoản Auth hoặc quyền admin. Nhập `XOA TAT CA` và bấm xác nhận. Không thể hoàn tác trong ứng dụng.
@@ -102,7 +102,7 @@ Bấm **Deploy**. Nếu chưa biết URL lần đầu, để trống `VITE_SITE_
 1. Mở `/` trên máy chiếu: hết nhãn “Bản trải nghiệm”, trạng thái chuyển “Đang nhận lời chúc”.
 2. Mở `/join` trên điện thoại dùng mạng di động, gửi một lời chúc. Trong Supabase Table Editor kiểm tra có một dòng `pending`.
 3. Mở `/admin`, đăng nhập user được cấp quyền và duyệt dòng vừa gửi.
-4. Màn hình chiếu nhận lời mới: một thẻ và một lá thư xuất hiện tương ứng. Không cần F5.
+4. Màn hình chiếu nhận lời mới: một thẻ và một chiếc lá đổi màu xuất hiện tương ứng. Không cần F5.
 5. Duyệt thêm ít nhất 5 lời để kiểm tra khung luôn giữ 5 thẻ, lời thứ 6 đẩy thẻ đầu lên. Các lá thư cũ vẫn ở trên cây.
 6. Thử Ẩn một lời chúc trong `/admin`: thư tương ứng được gỡ, khung cập nhật; nếu sự kiện Realtime không đến, tải lại dự phòng trong khoảng 15 giây.
 7. Reload trang chiếu: toàn bộ thư được khôi phục, chỉ 5 lời mới nhất trong khung, không phát lại hàng loạt lịch sử.

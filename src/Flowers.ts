@@ -32,10 +32,10 @@ export function createYellowFlowers(scene: THREE.Scene,reducedMotion: boolean) {
   for (let i = 0; i < pp.count; i++) pp.setZ(i,Math.pow(pp.getY(i),2) * .65); petalGeometry.computeVertexNormals();
   const uv=petalGeometry.attributes.uv;
   for(let i=0;i<uv.count;i++) uv.setXY(i,pp.getX(i)/.34+.5,pp.getY(i)/.41);
-  const petalMaterial = new THREE.MeshStandardMaterial({color:'#ffc61e',roughness:.74,side:THREE.DoubleSide,emissive:'#9b5a00',emissiveIntensity:.1});
+  const petalMaterial = new THREE.MeshStandardMaterial({color:'#ffffff',roughness:.86,side:THREE.DoubleSide});
   petalMaterial.map=petalDetailTexture();
   const petals = new THREE.InstancedMesh(petalGeometry,petalMaterial,count * 8);
-  const centers = new THREE.InstancedMesh(new THREE.SphereGeometry(.085,8,5),new THREE.MeshStandardMaterial({color:'#9b591f',roughness:.95}),count);
+  const centers = new THREE.InstancedMesh(new THREE.SphereGeometry(.085,8,5),new THREE.MeshStandardMaterial({color:'#c18b2d',roughness:.95}),count);
   const stems = new THREE.InstancedMesh(new THREE.CylinderGeometry(.009,.015,1,5),new THREE.MeshStandardMaterial({color:'#527b30',roughness:1}),count);
   const leafShape = new THREE.Shape(); leafShape.moveTo(0,0); leafShape.quadraticCurveTo(-.08,.22,0,.5); leafShape.quadraticCurveTo(.08,.22,0,0);
   const leaves = new THREE.InstancedMesh(new THREE.ShapeGeometry(leafShape,3),new THREE.MeshStandardMaterial({color:'#668b34',roughness:1,side:THREE.DoubleSide}),count * 2);
@@ -51,8 +51,10 @@ export function createYellowFlowers(scene: THREE.Scene,reducedMotion: boolean) {
     if(detailed) detail.fill(1,i*8,i*8+8);
     const patch=.9 + .1*Math.sin(x*.23+Math.cos(z*.18));
     const taper=1-THREE.MathUtils.smoothstep(r,24,42)*.75;
-    flowers.push({x,z,y:terrainHeight(x,z),h:(1.05 + rand(i + 13) * .85)*patch*taper,s:(.55 + rand(i + 74) * .6)*taper,tilt:(rand(i + 99) - .5) * .5,phase:rand(i + 41) * Math.PI * 2});
-    petals.setColorAt(i * 8,color.setHSL(.12 + rand(i) * .025,.85,.55 + rand(i + 8) * .08));
+    flowers.push({x,z,y:terrainHeight(x,z),h:(.65 + rand(i + 13) * .7)*patch*taper,s:(.5 + rand(i + 74) * .45)*taper,tilt:(rand(i + 99) - .5) * .5,phase:rand(i + 41) * Math.PI * 2});
+    petals.setColorAt(i * 8,color.set(i%5<2 ? '#fff7df' : i%5===2 ? '#ffe8a1' : '#eec23e'));
+    centers.setColorAt(i,color.set(i%5<2 ? '#e3b947' : '#9c672c'));
+    color.set(i%5<2 ? '#fff7df' : i%5===2 ? '#ffe8a1' : '#eec23e');
     for (let j = 1; j < 8; j++) petals.setColorAt(i * 8 + j,color);
   }
   petalGeometry.setAttribute('aFlowerDetail',new THREE.InstancedBufferAttribute(detail,1));
@@ -66,7 +68,7 @@ export function createYellowFlowers(scene: THREE.Scene,reducedMotion: boolean) {
         dummy.position.copy(base); dummy.quaternion.copy(orientation.quaternion); dummy.rotateZ(j / 8 * Math.PI * 2); dummy.scale.setScalar(f.s); dummy.updateMatrix(); petals.setMatrixAt(i * 8 + j,dummy.matrix);
       }
       dummy.position.copy(base).add(new THREE.Vector3(0,.025,0)); dummy.quaternion.copy(orientation.quaternion); dummy.scale.set(f.s,f.s,.48 * f.s); dummy.updateMatrix(); centers.setMatrixAt(i,dummy.matrix);
-      for (let j = 0; j < 2; j++) { dummy.position.set(f.x,f.y + f.h * (.3 + j * .25),f.z); dummy.rotation.set(.5,j * Math.PI + f.phase,(j ? -1 : 1) * .8); dummy.scale.setScalar(.55); dummy.updateMatrix(); leaves.setMatrixAt(i * 2 + j,dummy.matrix); }
+      for (let j = 0; j < 2; j++) { dummy.position.set(f.x,f.y + f.h * (.3 + j * .25),f.z); dummy.rotation.set(.5,j * Math.PI + f.phase,(j ? -1 : 1) * .8); dummy.scale.setScalar(.8); dummy.updateMatrix(); leaves.setMatrixAt(i * 2 + j,dummy.matrix); }
     });
     for (const mesh of [petals,centers,stems,leaves]) mesh.instanceMatrix.needsUpdate = true;
   }
